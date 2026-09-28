@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《爪爪乐园》游戏设计方案 v3.0 — 内购破解版</title>
+<style>
+  :root{
+    --bg:#FBF9F6; --card:#FFFFFF; --line:#E8E3DC; --line-2:#D9D2C8;
+    --ink:#2C2C2A; --ink-2:#5F5E5A; --ink-3:#8A8781;
+    --coral:#D85A30; --coral-bg:#FAECE7;
+    --teal:#1D9E75; --teal-bg:#E1F5EE;
+    --amber:#BA7517; --amber-bg:#FAEEDA;
+    --purple:#7F77DD; --purple-bg:#EEEDFE;
+    --blue:#378ADD; --blue-bg:#E6F1FB;
+    --pink:#D4537E; --pink-bg:#FBEAF0;
+    --green:#639922; --green-bg:#EAF3DE;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:56px 32px 96px;}
+
+  .cover{border-bottom:2px solid var(--ink); padding-bottom:32px; margin-bottom:48px;}
+  .kicker{font-size:13px; letter-spacing:.14em; color:var(--coral); font-weight:600; text-transform:uppercase; margin-bottom:14px;}
+  h1{font-size:38px; line-height:1.25; margin:0 0 14px; font-weight:700; letter-spacing:-.01em;}
+  .sub{font-size:17px; color:var(--ink-2); margin:0 0 24px; max-width:660px;}
+  .meta{display:flex; flex-wrap:wrap; gap:28px; font-size:13px; color:var(--ink-3);}
+  .meta b{display:block; color:var(--ink); font-weight:600; font-size:14px; margin-top:2px;}
+
+  h2{font-size:23px; margin:56px 0 8px; font-weight:700; padding-bottom:10px; border-bottom:1px solid var(--line); letter-spacing:-.005em;}
+  h2 .num{color:var(--coral); font-variant-numeric:tabular-nums; margin-right:10px;}
+  h3{font-size:16.5px; margin:32px 0 10px; font-weight:600;}
+  h4{font-size:14.5px; margin:22px 0 8px; font-weight:600; color:var(--ink-2);}
+  p{margin:10px 0; color:var(--ink-2);}
+  p strong,li strong{color:var(--ink); font-weight:600;}
+  ul,ol{margin:10px 0; padding-left:22px; color:var(--ink-2);}
+  li{margin:5px 0;}
+
+  table{width:100%; border-collapse:collapse; margin:18px 0; font-size:13.5px;}
+  th{background:#F5F2ED; text-align:left; padding:10px 12px; font-weight:600; color:var(--ink); border-bottom:1px solid var(--line-2); white-space:nowrap;}
+  td{padding:10px 12px; border-bottom:1px solid var(--line); color:var(--ink-2); vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  table.tight th,table.tight td{padding:8px 10px;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 24px; margin:20px 0;}
+  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin:20px 0;}
+  .grid3{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:20px 0;}
+  .tile{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+  .tile .t{font-weight:600; font-size:14px; margin:0 0 6px; color:var(--ink);}
+  .tile .d{font-size:13px; color:var(--ink-2); margin:0; line-height:1.65;}
+  .tile.coral{border-left:3px solid var(--coral);}
+  .tile.teal{border-left:3px solid var(--teal);}
+  .tile.amber{border-left:3px solid var(--amber);}
+  .tile.purple{border-left:3px solid var(--purple);}
+  .tile.blue{border-left:3px solid var(--blue);}
+
+  .callout{background:var(--coral-bg); border-left:3px solid var(--coral); border-radius:0 10px 10px 0; padding:14px 20px; margin:20px 0; font-size:14px; color:#712B13;}
+  .callout.teal{background:var(--teal-bg); border-color:var(--teal); color:#085041;}
+  .callout.amber{background:var(--amber-bg); border-color:var(--amber); color:#633806;}
+  .callout.purple{background:var(--purple-bg); border-color:var(--purple); color:#3C3489;}
+  .callout.green{background:var(--green-bg); border-color:var(--green); color:#3B5B10;}
+  .callout p{color:inherit; margin:4px 0; font-size:14px;}
+  .callout .h{font-weight:600; display:block; margin-bottom:4px;}
+
+  .pill{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 9px; border-radius:20px; margin-right:6px; vertical-align:middle;}
+  .pill.cat{background:var(--purple-bg); color:#3C3489;}
+  .pill.dog{background:var(--amber-bg); color:#633806;}
+  .pill.both{background:var(--teal-bg); color:#085041;}
+  .pill.gold{background:var(--amber-bg); color:#633806;}
+  .pill.gem{background:var(--blue-bg); color:#0C447C;}
+  .pill.star{background:var(--pink-bg); color:#72243E;}
+  .pill.keep{background:var(--green-bg); color:#27500A;}
+  .pill.del{background:#F1EFE8; color:#5F5E5A; text-decoration:line-through;}
+  .pill.new{background:var(--coral-bg); color:#712B13;}
+
+  .chain{font-size:13px; color:var(--ink-2); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:#F7F5F1; border-radius:8px; padding:12px 16px; margin:12px 0; line-height:2; overflow-x:auto; white-space:nowrap;}
+  .chain b{color:var(--ink); font-weight:600;}
+
+  .loop{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:22px 0;}
+  .step{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .step .n{font-size:11px; font-weight:700; color:var(--coral); letter-spacing:.1em;}
+  .step .t{font-weight:600; font-size:14px; margin:4px 0;}
+  .step .d{font-size:12.5px; color:var(--ink-2); line-height:1.6;}
+
+  footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-3);}
+  @media print{
+    body{background:#fff;} .wrap{padding:0; max-width:none;}
+    h2{page-break-after:avoid;} table,.card,.tile{page-break-inside:avoid;}
+  }
+  @media (max-width:640px){
+    .wrap{padding:32px 18px 64px;} h1{font-size:28px;} h2{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="cover">
+  <div class="kicker">Game Design Proposal · v3.0 · 内购破解版</div>
+  <h1>《爪爪乐园》</h1>
+  <p class="sub">对标《肥鹅健身房》「合成 + 模拟经营」双循环玩法，以猫狗为主角的<strong>单机游戏</strong>。完整保留原版的付费体系与消费结构，仅将"真实支付"替换为"模拟充值"——即标准的<strong>内购破解版</strong>形态。</p>
+  <div class="meta">
+    <div>产品形态<b>纯单机 · 竖屏 · 手机为主</b></div>
+    <div>技术栈<b>HTML5 · DOM + Canvas</b></div>
+    <div>首发形态<b>网页版 + 安卓 APK</b></div>
+    <div>MVP 周期<b>约 8 周</b></div>
+  </div>
+</div>
+
+<div class="callout purple">
+  <span class="h">v3.0 相对 v2.0 的核心变更</span>
+  <p>① <strong>经济模型不再重构</strong>——沿用原版的产出 / 消耗平衡。付费商品本身就是经过市场验证的货币回收池，没有理由推翻重做。唯一改动是货币来源：真实支付 → 模拟充值。</p>
+  <p>② <strong>体力系统回归原版</strong>——上限 100、每 2 分钟恢复 1 点、每日 12:00 / 18:00 / 24:00 三段补贴、四档钻石补充价全部照搬，仅在商城增加一个买体力的快捷入口。</p>
+  <p>③ <strong>删除"拟联网包装层"</strong>——不做假排行榜、假世界频道、假好友。保留签到、每日限时商店等有实际玩法价值的功能。</p>
+  <p>④ <strong>删除"开发者模式"</strong>——已被模拟充值取代，无需重复出口。</p>
+  <p>⑤ <strong>新增"分享与分发"章节</strong>——目标从"自己玩"扩展为"自己玩 + 分享给朋友"，需配套存档导出、布局分享码、多形态打包方案，美术原创性风险等级相应上调。</p>
+  <p>⑥ <strong>限购按类别差异化放开</strong>——礼包拆成两类：<strong>阶段性礼包保持限购</strong>（超值但限量），<strong>商城礼包不限购</strong>（常驻但定价更高，约 9 折）；金币类商品全部不限购；<strong>体力包维持原版每日重置的价格阶梯与次数</strong>，不做破解改造；收集品不限购，重复获得自动转换为金币或钻石。详见 10.4 节。</p>
+  <p>⑦ <strong>确立破解架构原则</strong>——模拟充值做成<strong>独立旁路模块</strong>（只负责往钻石余额加钱），所有商品逻辑完全按原版实现、一行不改。这样将来去掉破解功能或切回商业版时<strong>零改造</strong>。</p>
+  <p>⑧ <strong>确认产品形态</strong>——<strong>竖屏、手机为主</strong>，首发形态为<strong>网页版（分享给朋友 / 覆盖 iOS）+ 安卓 APK（自己玩）</strong>。详见 13.1 节。</p>
+  <p>⑨ <strong>技术栈改为纯 HTML5</strong>（DOM + CSS + Canvas）——放弃 Cocos Creator。原因是 Cocos 需在 GUI 编辑器手工搭场景、无法代码化交付；而本作 80% 内容是 UI，DOM + CSS 效率高得多。Cocos 的粒子与骨骼动画能力分别由 <strong>Canvas 2D 叠加层</strong>与 <strong>Rive</strong> 覆盖。MVP 周期相应从 10 周缩短至 <strong>8 周</strong>，P0 原型已完成。</p>
+  <p>⑩ <strong>玩法基线重新校正</strong>（2026-09-28）——此前对"发射器/母体"体系的理解有多处错误：发射器不是固定挂件而是<b>合成链的一部分</b>；链的终点是<b>母体或纯任务物品</b>；<b>母体不可合并</b>、耐久耗尽即消失（本质是"一次性物资包"）；一个发射器可产出 <b>1~3 种</b>物品且有掉落概率。完整拆解见独立文档 <code>肥鹅健身房-玩法机制拆解.html</code>。</p>
+  <p>⑪ <strong>体力模型修正</strong>——由"每日 12:00 / 24:00 定点回满"改为<b>每 2 分钟恢复 1 点 + 12:00 / 18:00 / 24:00 三段可领补贴</b>。详见 11 节。</p>
+  <p>⑫ <strong>次数继承规则定稿为「甲 · 重置为满」+ 新增礼包链</strong>（2026-09-28）——合成出的发射器耐久一律回满、不继承素材剩余次数。该规则在<b>单级链</b>里会退化成机械操作，因此必须配套<b>跨等级的中段发射器</b>才能成立：点剩最后 1 次 → 合成后回满 → 中间点掉的次数全部白赚，定位是<b>给玩家的隐藏福利</b>。为此在 P0 中新增「礼包链」（伴手礼 Lv1 → 豪华礼盒 Lv2，均可点击产货币），并明确<b>链的终点只有两种：母体 或 纯任务物品，两者都不可再合成</b>。详见 4.2 / 4.3 节与 <code>肥鹅健身房-玩法机制拆解.html</code> 第 10.4 节。</p>
+  <p>⑬ <strong>P0 原型完成度</strong>——发射器掉落表与概率、发射器出现在链中段、甲规则、资源型掉落（金币 / 钻石直接进余额不占格子）、体力系统、旧存档迁移均已落地；配套 3 套自动化测试（纯逻辑 / 冒烟 / 存档），可一键回归。</p>
+</div>
+
+<h2><span class="num">01</span>对标拆解：《肥鹅健身房》靠什么跑起来</h2>
+
+<p>机制还原是设计前提。需要明确一点：<strong>这套玩法的成瘾性不来自"合成"本身，而来自合成层与经营层之间的强反馈闭环</strong>。合成只是产出手段，经营才是留存钩子。</p>
+
+<h3>1.1 产品档案</h3>
+<table>
+  <thead><tr><th>维度</th><th>事实</th></tr></thead>
+  <tbody>
+    <tr><td>开发商</td><td>疯狂游戏（Crazy Games / 豪腾创想），代表作《咸鱼之王》</td></tr>
+    <tr><td>上线历程</td><td>2020 年 9 月获版号，初版为纯模拟经营；2021 年 11 月立项重做，加入合成玩法，开发周期不足 3 个月，随后冲上微信休闲榜 Top2</td></tr>
+    <tr><td>灵感来源</td><td>日本独立游戏《捡到相扑选手》</td></tr>
+    <tr><td>成绩</td><td>2025 上半年收入约 2171 万元；iOS 端平均日营收约 3.5 万美元</td></tr>
+    <tr><td>用户画像</td><td>女性玩家占比超 70%，24–30 岁人群占比超 5 成</td></tr>
+  </tbody>
+</table>
+
+<h3>1.2 双循环内核</h3>
+<div class="loop">
+  <div class="step"><div class="n">STEP 1</div><div class="t">合成棋盘</div><div class="d">点击发射器产出低级元素，两个相同元素二合为一升级</div></div>
+  <div class="step"><div class="n">STEP 2</div><div class="t">顾客订单</div><div class="d">到访顾客提出物品需求，有倒计时，可主动放弃</div></div>
+  <div class="step"><div class="n">STEP 3</div><div class="t">结算奖励</div><div class="d">交付后获得经验、金币、好感度（实测约 15 经验 / 30 金币 / 40 好感）</div></div>
+  <div class="step"><div class="n">STEP 4</div><div class="t">装饰与解锁</div><div class="d">星星用于装饰升级，经验累积解锁新区域</div></div>
+  <div class="step"><div class="n">STEP 5</div><div class="t">反哺需求</div><div class="d">新区域带来更高等级订单，逼玩家回头做更深的合成链</div></div>
+</div>
+
+<h3>1.3 完整系统清单（13 个子系统）</h3>
+<table class="tight">
+  <thead><tr><th>层级</th><th>子系统</th><th>核心作用</th></tr></thead>
+  <tbody>
+    <tr><td rowspan="5">合成层</td><td>主棋盘</td><td>网格容器，初始格子有限，扩容消耗金币（约 1000 金币/格起）</td></tr>
+    <tr><td>发射器系统</td><td>点击型、自动型、手动型、冷却型四类</td></tr>
+    <tr><td>合成链</td><td>每类物品 1–9 级，二合为一</td></tr>
+    <tr><td>道具系统</td><td>剪刀（切割发射器降级）、充能器（释放储存产物）、加速、能量球</td></tr>
+    <tr><td>体力系统</td><td>每 2 分钟恢复 1 点 + 12:00 / 18:00 / 24:00 三段补贴</td></tr>
+    <tr><td rowspan="4">经营层</td><td>订单系统</td><td>顾客需求 → 交付 → 结算，构成主要产出</td></tr>
+    <tr><td>星星与装饰</td><td>装饰物可自由摆放、更换外观与朝向</td></tr>
+    <tr><td>区域解锁</td><td>共 8 个区域：有氧区、重量区、更衣室、练操房、冥想室、篮球训练场、游泳池、动感舞区</td></tr>
+    <tr><td>图鉴系统</td><td>棋盘元素、装饰物、到访顾客均可收集</td></tr>
+    <tr><td rowspan="4">外围层</td><td>商城</td><td>6:00 / 12:00 / 18:00 / 24:00 刷新货物</td></tr>
+    <tr><td>卡牌收集</td><td>配合订单抽屉剧情做轻叙事</td></tr>
+    <tr><td>造型系统</td><td>上百种服装配饰</td></tr>
+    <tr><td>限时活动</td><td>财神、创世鹅副本、品牌联动</td></tr>
+  </tbody>
+</table>
+
+<h3>1.4 三个真正让它跑通的点</h3>
+<div class="grid3">
+  <div class="tile teal"><p class="t">秒级反馈闭环</p><p class="d">点击 → 合成 → 交付 → 奖励，全链路没有等待。合成动画的"啪"感是核心手感资产。</p></div>
+  <div class="tile purple"><p class="t">收集驱动留存</p><p class="d">图鉴 + 卡牌 + 造型三层收集，天然匹配目标用户的探索与收集偏好。</p></div>
+  <div class="tile amber"><p class="t">长线内容供给</p><p class="d">版本迭代 + 节日活动 + 联动，持续提供回流理由。</p></div>
+</div>
+
+<h2><span class="num">02</span>主题包装：为什么猫狗比鹅更值得做</h2>
+
+<p>换皮是低级做法。猫狗主题的真正价值在于，<strong>它能在不改动核心玩法的前提下，天然解决原版三个结构性瓶颈</strong>。</p>
+
+<table>
+  <thead><tr><th>瓶颈</th><th>原版（鹅）</th><th>猫狗版优势</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>可收集角色池太窄</td>
+      <td>鹅的形象单一，只能靠造型和配色区分，角色扩展天花板低</td>
+      <td>猫狗品种天然丰富——布偶、橘猫、暹罗、哈士奇、柯基、柴犬、金毛……<strong>角色池扩容 10 倍以上</strong>，且用户对品种有天然认知，不需教育成本</td>
+    </tr>
+    <tr>
+      <td>人设与剧情难写</td>
+      <td>鹅缺乏普遍认知的性格标签，故事线要靠文案硬造</td>
+      <td>品种自带性格预设（哈士奇拆家、柯基短腿欢脱、布偶高冷），<strong>人设可直接调用用户既有印象</strong></td>
+    </tr>
+    <tr>
+      <td>缺乏玩法分支的天然理由</td>
+      <td>单一物种，很难做出合理的双线设计</td>
+      <td>猫与狗的习性差异，<strong>为"双阵营双棋盘"提供不需要解释的世界观基础</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>2.1 世界观与包装映射</h3>
+<p>玩家身份从"健身房店长"变为<strong>"爪爪乐园店长"</strong>——经营一家猫狗日托乐园，为毛孩子提供洗护、玩耍、训练、住宿、诊疗服务。</p>
+
+<table>
+  <thead><tr><th>原版元素</th><th>猫狗版对应</th><th>包装增益</th></tr></thead>
+  <tbody>
+    <tr><td>肥鹅顾客</td><td>猫狗顾客（按品种区分）</td><td>品种即角色，收集欲更强</td></tr>
+    <tr><td>健身房功能区</td><td>乐园功能区（洗护区、玩耍区、训练场、餐厅、午睡区、泳池、诊疗室、摄影棚）</td><td>功能区与服务内容对应关系更直觉</td></tr>
+    <tr><td>健身器材合成链</td><td>宠物用品合成链（玩具、零食、洗护、家具、医疗）</td><td>物品更萌、更具分享欲</td></tr>
+    <tr><td>肥鹅造型</td><td>宠物造型（项圈、领结、小衣服、帽子）</td><td>装扮是宠物内容的天然爆点</td></tr>
+    <tr><td>订单抽屉剧情</td><td>毛孩子的故事（每只专属 3–5 段）</td><td>情感浓度更高</td></tr>
+  </tbody>
+</table>
+
+<h3>2.2 名称与 Slogan</h3>
+<div class="grid2">
+  <div class="tile coral"><p class="t">首选：《爪爪乐园》</p><p class="d">"爪爪"叠词萌感强，读起来有记忆点；"乐园"直接点明经营属性，且比"健身房"有更大的内容扩展空间。</p></div>
+  <div class="tile"><p class="t">备选</p><p class="d">《毛孩子乐园》《喵汪乐园》《爪爪日托所》《猫狗事务所》。</p></div>
+</div>
+<p><strong>Slogan：</strong>把每一只毛孩子，都宠成小公主。</p>
+
+<h2><span class="num">03</span>核心循环设计</h2>
+
+<p>主循环与对标产品保持一致，但把"装饰升级"和"区域解锁"做了明确的<strong>资源分离</strong>：星星只管装饰（审美消费），经验只管解锁（硬性进度），避免原版中两者边界模糊导致决策困惑。</p>
+
+<div class="card">
+  <h4 style="margin-top:0">玩家单次会话的完整动线</h4>
+  <p style="font-size:13.5px">打开游戏 → 读取存档 → 领每日签到奖励 → 收离线期间常驻宠物的产出 → 清理棋盘（卖掉低价值产物）→ 点击发射器攒素材 → 二合到订单所需等级 → 交付 3–5 个订单 → 拿星星装饰 + 攒经验 + 攒金币 → 逛每日限时商城 → 体力耗尽 → 视情况去充值中心补体力 → 下线</p>
+</div>
+
+<div class="callout teal">
+  <span class="h">关键设计原则</span>
+  <p>单次会话必须能在 <strong>3 分钟内完成一次完整闭环</strong>（合成→交付→拿奖励）。碎片化是这类产品的生命线。</p>
+</div>
+
+<h2><span class="num">04</span>合成系统设计</h2>
+
+<h3>4.1 棋盘</h3>
+<table class="tight">
+  <thead><tr><th>参数</th><th>取值</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>棋盘尺寸</td><td>7 × 9 = 63 格</td><td>手机竖屏适配，单格约 48–52px</td></tr>
+    <tr><td>初始解锁</td><td>35 格（约 55%）</td><td>保留空间焦虑，驱动扩容消费</td></tr>
+    <tr><td>扩容成本</td><td>首格 800 金币，每格递增 15%</td><td>金币的主要回收池</td></tr>
+    <tr><td>合成规则</td><td>二合为一（2 个同级 → 1 个上级）</td><td>不做三合一，降低操作负担</td></tr>
+    <tr><td>合成等级</td><td>Lv1 – Lv8（部分稀有链到 Lv9）</td><td>Lv8 需 128 个 Lv1，Lv9 需 256 个</td></tr>
+  </tbody>
+</table>
+
+<h3>4.2 发射器设计</h3>
+<p>发射器按操作方式分四类，这是控制玩家节奏的核心杠杆——<strong>点击型给主动收益，自动型给被动收益，冷却型给"回来看看"的理由</strong>。</p>
+
+<table>
+  <thead><tr><th>类型</th><th>发射器</th><th>主产物</th><th>副产物</th><th>耐久 / 机制</th></tr></thead>
+  <tbody>
+    <tr><td rowspan="5">点击型</td><td>洗护车</td><td>洗护用品</td><td>毛巾</td><td>15 次点击</td></tr>
+    <tr><td>玩具架</td><td>玩具</td><td>包装盒</td><td>15 次点击</td></tr>
+    <tr><td>冰箱</td><td>零食</td><td>保鲜袋</td><td>15 次点击</td></tr>
+    <tr><td>家具车</td><td>家具</td><td>螺丝、木板</td><td>12 次点击</td></tr>
+    <tr><td>训练车</td><td>训练器材</td><td>口哨</td><td>12 次点击</td></tr>
+    <tr><td rowspan="2">自动型</td><td>猫爬架</td><td>自动释放：毛球</td><td>—</td><td>无限，速度受等级影响</td></tr>
+    <tr><td>狗窝</td><td>自动释放：骨头</td><td>—</td><td>无限，速度受等级影响</td></tr>
+    <tr><td>手动型</td><td>猫窝 / 狗窝</td><td>点击放出猫咪 / 狗狗（可合成）</td><td>—</td><td>每日免费领 1 个</td></tr>
+    <tr><td rowspan="2">冷却型</td><td>储物篮</td><td>冷却结束点击：毛发 + 钥匙</td><td>—</td><td>冷却 30 分钟</td></tr>
+    <tr><td>收银台</td><td>冷却结束点击：金币 + 优惠券</td><td>—</td><td>冷却 2 小时</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <span class="h">隐藏机制：次数继承规则 —— 已定稿为「甲 · 重置为满」</span>
+  <p>原版社区对此流传两种互相矛盾的说法："点剩最后一次再合成"（暗示点掉的次数不白点）与"2 级点了会影响三级次数"（暗示有继承惩罚）。<strong>本项目裁定为「甲 · 重置为满」</strong>：合成出的发射器耐久一律回满，两个素材各自剩多少都不继承。定位是<strong>给玩家的隐藏福利</strong>。</p>
+  <p><strong>★ 这条规则的价值完全取决于链的结构。</strong>它要求链上存在<strong>跨等级的中段发射器</strong>（两级都可点击、可合并，如原版手提包 Lv1 → Lv2）。此时玩家会发现：<strong>"点剩最后 1 次 → 合成后回满 → 中间点掉的次数全部白赚"</strong>，"什么时候停手"于是变成有正收益的取舍（点掉 = 立刻换低价值产出；留着 = 延迟换高价值产出）。反之，<strong>如果发射器只出现在链的顶端（合到顶即母体、母体不可合并），甲就退化成"合前点到剩 1 次"的机械操作</strong>，福利无从体现。</p>
+  <p><strong>配套要求：</strong>合成后必须立刻用飘字 / 提示把"你之前点掉的 N 次白赚了"显性化。<strong>这类"可被发现的隐藏收益"是社区内容的重要燃料，但前提是玩家真的能发现它</strong>——藏着不说等于没有。</p>
+</div>
+
+<div class="callout purple">
+  <span class="h">链的结构：终点只有两种，但发射器可以在中段</span>
+  <p><strong>终点只有两种：</strong>① <strong>母体</strong>——可点击产出下一条链，耐久耗尽即消失，本质是"一次性物资包"；② <strong>纯任务物品</strong>——只用于交付订单。<strong>两者都不可再合成。</strong></p>
+  <p><strong>但发射器也可以出现在链的中段</strong>：既能点击产出，又能继续往上合。这正是「甲 · 重置为满」得以成立的前提。<strong>设计时必须刻意在每条链上留至少一个中段发射器</strong>，否则整条链的决策深度会塌掉。</p>
+  <p><strong>中段发射器实例（礼包链，已落地 P0）：</strong></p>
+  <div class="chain"><b>礼包链</b>　伴手礼 🎁（Lv1，8 次，产金币 15–40）→ 豪华礼盒 🎀（Lv2，18 次，产金币 40–110 / 8% 概率产钻石）</div>
+  <p>这条链没有顶端，Lv2 就是终点。它的作用是把"点击发射器"直接接到货币体系上，让玩家在体力分配之外多一层<strong>"点货币还是点材料"</strong>的取舍。</p>
+  <p><strong>资源型掉落：</strong>发射器的掉落表可以产出货币。金币 / 钻石<strong>直接进余额、不占棋盘格</strong>——否则货币会挤占棋盘空间，反而破坏节奏。</p>
+</div>
+
+<h3>4.3 合成链设计（猫派 5 条 + 狗派 5 条 + 共用 4 条）</h3>
+
+<p>这是猫狗主题最大的差异化落点。<strong>猫派与狗派各有一套独立合成链，产物不互通</strong>，但共用同一块棋盘。玩家可双线并行，也可专精一条。</p>
+
+<h4><span class="pill cat">猫派</span>五条主线</h4>
+<div class="chain"><b>洗护链</b>　猫毛梳 → 指甲剪 → 洗澡盆 → 吹风机 → 烘干箱 → 美容套装 → 猫 SPA 仪 → 猫 SPA 大师</div>
+<div class="chain"><b>玩具链</b>　毛线球 → 逗猫棒 → 铃铛球 → 猫抓板 → 猫爬架 → 猫隧道 → 猫城堡 → 猫游乐场</div>
+<div class="chain"><b>零食链</b>　猫条 → 冻干 → 罐头 → 小鱼干 → 三文鱼 → 猫零食塔 → 猫盛宴 → 猫满汉全席</div>
+<div class="chain"><b>舒适链</b>　猫垫 → 猫窝 → 猫吊床 → 猫沙发 → 猫跳台 → 猫塔 → 猫宫殿 → 猫城堡</div>
+<div class="chain"><b>医疗链</b>　驱虫药 → 疫苗 → 营养膏 → 化毛膏 → 体检仪 → 猫诊所 → 猫医院 → 猫医疗中心</div>
+
+<h4><span class="pill dog">狗派</span>五条主线</h4>
+<div class="chain"><b>洗护链</b>　毛刷 → 指甲钳 → 浴缸 → 吹水机 → 美容台 → 香波套装 → 狗 SPA 仪 → 狗 SPA 大师</div>
+<div class="chain"><b>玩具链</b>　网球 → 咬胶 → 飞盘 → 拔河绳 → 漏食球 → 敏捷架 → 训练场 → 狗游乐场</div>
+<div class="chain"><b>零食链</b>　狗饼干 → 肉干 → 大骨棒 → 罐头 → 牛排 → 狗零食塔 → 狗盛宴 → 狗满汉全席</div>
+<div class="chain"><b>训练链</b>　口令卡 → 牵引绳 → 训练垫 → 障碍杆 → 敏捷赛道 → 服从赛 → 冠军奖杯 → 狗界传奇</div>
+<div class="chain"><b>医疗链</b>　驱虫药 → 疫苗 → 关节宝 → 益生菌 → 体检仪 → 狗诊所 → 狗医院 → 狗医疗中心</div>
+
+<h4><span class="pill both">共用</span>四条特殊链</h4>
+<div class="chain"><b>清洁链</b>　毛发 → 毛团 → 垃圾袋 → 吸尘器 → 清洁车 → 洗地机 → 全自动清洁站 → 洁净乐园</div>
+<div class="chain"><b>货币链</b>　铜币 → 银币 → 金币袋 → 钱箱 → 保险柜 → 金库 → 银行 → 乐园集团</div>
+<div class="chain"><b>快递链</b>　纸箱 → 包裹 → 快递车 → 物流中心 → 仓储园 → 分拣中心 → 供应链 → 乐园总部</div>
+<div class="chain"><b>时光链</b>　沙漏 → 怀表 → 时钟 → 座钟 → 时光门 → 时空隧道 → 时光机 → 永恒之门（活动限定）</div>
+
+<div class="callout purple">
+  <span class="h">成本曲线提醒</span>
+  <p>二合一是纯指数结构，Lv8 = 128 个 Lv1，Lv9 = 256 个。这意味着<strong>一条链升到 8 级，需要点击发射器约 128 次，也就是 128 点体力</strong>。体力上限与补充节奏必须据此反推。</p>
+</div>
+
+<h3>4.4 道具系统</h3>
+<table class="tight">
+  <thead><tr><th>道具</th><th>效果</th><th>获取方式</th></tr></thead>
+  <tbody>
+    <tr><td>剪刀</td><td>将发射器剪成低一级，同时释放其已储存的产物</td><td>商城（金币 / 钻石）</td></tr>
+    <tr><td>充能器</td><td>一次性释放发射器储存的全部产物</td><td>商城（钻石）</td></tr>
+    <tr><td>能量球（紫 / 蓝 / 绿）</td><td>补充体力，紫 &gt; 蓝 &gt; 绿</td><td>每日任务 / 签到 / 活动</td></tr>
+    <tr><td>加速沙漏</td><td>缩短冷却型发射器等待时间</td><td>商城（金币）</td></tr>
+    <tr><td>无限能量（限时）</td><td>N 分钟内点击不消耗体力</td><td>商城（钻石）/ 充值礼包</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="num">05</span>订单与顾客系统</h2>
+
+<h3>5.1 订单结构（沿用原版）</h3>
+<table class="tight">
+  <thead><tr><th>订单档位</th><th>需求等级</th><th>倒计时</th><th>奖励倍率</th><th>出现条件</th></tr></thead>
+  <tbody>
+    <tr><td>普通订单</td><td>Lv1–Lv3</td><td>8 小时</td><td>1.0×</td><td>默认</td></tr>
+    <tr><td>进阶订单</td><td>Lv4–Lv5</td><td>4 小时</td><td>2.2×</td><td>等级 ≥ 10</td></tr>
+    <tr><td>稀有订单</td><td>Lv6–Lv7</td><td>2 小时</td><td>5.5×</td><td>等级 ≥ 22，需解锁对应区域</td></tr>
+    <tr><td>紧急订单</td><td>Lv7–Lv8</td><td>30 分钟</td><td>12×</td><td>等级 ≥ 35，随机触发</td></tr>
+  </tbody>
+</table>
+
+<p>基础奖励基准：<strong>15 经验 / 30 金币 / 40 好感度</strong>（沿用原版实测值），每提升 5 级整体上浮 20%。订单可主动放弃，但放弃后 10 分钟内不再刷新同类订单。</p>
+
+<h3>5.2 顾客机制</h3>
+<ul>
+  <li><strong>时段刷新：</strong>白天（06:00–18:00）狗顾客出现率 65%，夜间（18:00–06:00）猫顾客出现率 65%。不同时段订单偏好不同，形成"什么时候玩"的策略性。</li>
+  <li><strong>好感度：</strong>完成订单积累好感，好感满格后顾客转化为<strong>乐园常驻宠物</strong>。</li>
+  <li><strong>订单抽屉剧情：</strong>每个顾客有一段 3–5 幕的轻叙事，随好感度解锁，配插画。这是情感留存的核心。</li>
+</ul>
+
+<h2><span class="num">06</span>经营层：星星、装饰与区域</h2>
+
+<h3>6.1 区域解锁表</h3>
+<table>
+  <thead><tr><th>区域</th><th>解锁等级</th><th>对应合成链</th><th>解锁收益</th></tr></thead>
+  <tbody>
+    <tr><td>前台大厅</td><td>1</td><td>基础订单</td><td>教程、初始棋盘</td></tr>
+    <tr><td>洗护区</td><td>3</td><td>洗护链</td><td>开放洗护类订单</td></tr>
+    <tr><td>玩耍区</td><td>8</td><td>玩具链</td><td>开放玩具类订单 + 自动型发射器</td></tr>
+    <tr><td>餐厅</td><td>14</td><td>零食链</td><td>开放零食类订单 + 体力上限提升</td></tr>
+    <tr><td>训练场</td><td>20</td><td>训练链 / 医疗链</td><td>开放狗派训练订单 + 稀有订单</td></tr>
+    <tr><td>午睡区</td><td>26</td><td>舒适链</td><td>开放猫派舒适订单 + 离线收益上限提升</td></tr>
+    <tr><td>泳池区</td><td>32</td><td>清洁链 / 货币链</td><td>开放高倍率订单 + 金币产出加成</td></tr>
+    <tr><td>诊疗室</td><td>38</td><td>医疗链</td><td>开放医疗订单 + 道具掉落</td></tr>
+    <tr><td>摄影棚</td><td>45</td><td>造型系统</td><td>开放"拍照"功能，生成可保存的乐园明信片</td></tr>
+  </tbody>
+</table>
+<p style="font-size:13.5px; color:var(--ink-3)">注：摄影棚在原版中承担"社交分享传播"职能。单机版改为<strong>本地导出图片</strong>——生成一张带乐园布局与宠物合影的明信片 PNG，可保存到本地或直接发给朋友，保留仪式感。</p>
+
+<h3>6.2 装饰系统</h3>
+<p>沿用原版高自由度设计：装饰物可<strong>任意摆放位置、更换外观、调整朝向</strong>。装饰消耗星星，不产生直接数值收益——它的价值是<strong>把玩家的审美投入转化为沉没成本</strong>。这一点原版做得比同类产品好，必须保留。</p>
+<p>单机版追加：<strong>乐园布局可保存为多个"方案槽位"</strong>（如"日常版""圣诞版""夏日版"），一键切换。这让节日活动产出的限定装饰真正有使用场景，而不是堆在仓库里。</p>
+
+<h2><span class="num">07</span>差异化创新：五个必须加的东西</h2>
+
+<p>如果只是换皮，产品没有辨识度。以下五点是在不改动核心循环的前提下，能形成差异的设计。</p>
+
+<div class="grid2">
+  <div class="tile purple">
+    <p class="t">01 · 猫狗双阵营</p>
+    <p class="d">猫派 / 狗派各一套独立合成链，产物不互通，共用棋盘。玩家可双线并行或专精一线，专精线解锁"猫之大师 / 狗之大师"称号与专属装饰。开局即需做一次身份选择，强化代入感。</p>
+  </div>
+  <div class="tile teal">
+    <p class="t">02 · 顾客 → 常驻宠物</p>
+    <p class="d">好感度满格的顾客转化为常驻宠物，<strong>每小时自动产出一次资源，离线最多累积 8 小时</strong>。这是纯新增的放置收益层，解决原版"上线才有收益"的弱点。</p>
+  </div>
+  <div class="tile amber">
+    <p class="t">03 · 时段与天气系统</p>
+    <p class="d">白天狗多、夜间猫多；雨天触发特殊事件（狗狗弄脏了 → 洗护订单翻倍）。让"什么时候玩"本身成为决策。</p>
+  </div>
+  <div class="tile coral">
+    <p class="t">04 · 猫狗羁绊</p>
+    <p class="d">特定猫 + 狗组合摆放在同一区域，触发互动动画并产出稀有物品。例如「布偶猫 + 金毛 = 相拥午睡」→ 产出稀有装饰"温暖毛毯"。为装饰系统赋予功能性。</p>
+  </div>
+  <div class="tile blue">
+    <p class="t">05 · 宠物代打（放置深化）</p>
+    <p class="d">常驻宠物可被派遣去"帮忙点击发射器"N 次。离线期间自动消耗耐久并产出素材，把放置收益从"资源"延伸到"操作"。这是把体力瓶颈转化为养成动力的关键设计。</p>
+  </div>
+</div>
+
+<h2><span class="num">08</span>角色设计：首批 24 只</h2>
+
+<p>每只角色需要：<strong>品种 + 性格标签 + 口头禅 + 喜好物品 + 3–5 幕专属故事 + 5–8 件专属造型</strong>。性格直接调用用户对品种的既有认知，降低理解成本。</p>
+
+<table>
+  <thead><tr><th>阵营</th><th>角色</th><th>性格标签</th><th>核心订单偏好</th></tr></thead>
+  <tbody>
+    <tr><td rowspan="8"><span class="pill cat">猫派</span></td><td>布偶猫</td><td>高冷优雅，其实很粘人</td><td>舒适链（猫吊床、猫宫殿）</td></tr>
+    <tr><td>橘猫</td><td>贪吃，永远在等饭</td><td>零食链（罐头、三文鱼）</td></tr>
+    <tr><td>暹罗猫</td><td>话痨，什么都想管</td><td>玩具链（逗猫棒）</td></tr>
+    <tr><td>英短</td><td>慵懒，能躺着不站着</td><td>舒适链（猫沙发）</td></tr>
+    <tr><td>狸花猫</td><td>野性，拆家第一名</td><td>玩具链（猫抓板）</td></tr>
+    <tr><td>黑猫</td><td>神秘，走路没声音</td><td>医疗链（体检仪）</td></tr>
+    <tr><td>白猫</td><td>优雅，洁癖严重</td><td>洗护链（美容套装）</td></tr>
+    <tr><td>三花猫</td><td>幸运，抽奖手气好</td><td>货币链（金币袋）</td></tr>
+    <tr><td rowspan="8"><span class="pill dog">狗派</span></td><td>哈士奇</td><td>拆家，听不懂人话</td><td>玩具链（拔河绳）</td></tr>
+    <tr><td>柯基</td><td>短腿欢脱，屁股是资产</td><td>训练链（障碍杆）</td></tr>
+    <tr><td>柴犬</td><td>傻笑，表情包本体</td><td>零食链（肉干）</td></tr>
+    <tr><td>金毛</td><td>暖男，对谁都好</td><td>医疗链（益生菌）</td></tr>
+    <tr><td>泰迪</td><td>机灵，会察言观色</td><td>洗护链（香波套装）</td></tr>
+    <tr><td>拉布拉多</td><td>稳重，饭量惊人</td><td>零食链（牛排）</td></tr>
+    <tr><td>边牧</td><td>聪明，智商碾压店长</td><td>训练链（敏捷赛道）</td></tr>
+    <tr><td>法斗</td><td>憨厚，睡着会打呼</td><td>舒适链（狗窝）</td></tr>
+  </tbody>
+</table>
+<p style="font-size:13.5px; color:var(--ink-3)">剩余 8 只作为版本更新储备：缅因猫、无毛猫、萨摩耶、比熊、阿拉斯加、腊肠、博美、中华田园犬。</p>
+
+<h2><span class="num">09</span>经济结构：沿用原版 + 模拟充值</h2>
+
+<div class="callout teal">
+  <span class="h">设计原则：不重构经济</span>
+  <p>原版的产出 / 消耗平衡是经过市场验证的——<strong>那些需要真实付费的商品，本身就是最合理的货币回收池</strong>。既然付费体系整体保留，就没有理由推翻经济模型重做。</p>
+  <p>唯一的改动是<strong>货币来源</strong>：钻石不再需要真实付费，改为通过"模拟充值"获得。除此之外，所有商品的定价、限购、刷新节奏、产出速率全部照搬。</p>
+</div>
+
+<h3>9.1 四种货币的定位（沿用原版）</h3>
+<table>
+  <thead><tr><th>货币</th><th>主要产出</th><th>主要消耗</th><th>定位</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="pill gold">金币</span></td>
+      <td>订单结算、清洁链出售、货币链产出、常驻宠物、签到</td>
+      <td>棋盘扩容、商城材料箱、发射器购买与升级、加速沙漏、剪刀</td>
+      <td>基础流通货币，纯玩法产出，不可充值</td>
+    </tr>
+    <tr>
+      <td><span class="pill gem">钻石</span></td>
+      <td><strong>模拟充值</strong>、升级奖励、成就、图鉴收集、签到、节日活动</td>
+      <td>体力补充、稀有道具、限定造型、抽奖机、会员卡、成长基金、礼包</td>
+      <td>高级货币，模拟充值为主渠道</td>
+    </tr>
+    <tr>
+      <td><span class="pill star">星星</span></td>
+      <td>订单结算</td>
+      <td>装饰物购买与升级</td>
+      <td>装饰专用，与主经济隔离，防止干扰数值平衡</td>
+    </tr>
+    <tr>
+      <td>经验 / 好感度</td>
+      <td>订单结算</td>
+      <td>区域解锁门槛 / 常驻宠物转化</td>
+      <td>纯进度计量，不可消费</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout amber">
+  <span class="h">关键差异点</span>
+  <p><strong>金币不可充值，钻石可模拟充值。</strong>这个划分很重要——金币负责维持玩法的数值挑战（棋盘扩容、材料箱价格仍然是真实的经济压力），钻石负责消除"等不起"的体验摩擦。如果金币也能无限刷，整个合成经营的数值挑战会瞬间归零，游戏就不好玩了。</p>
+</div>
+
+<h3>9.2 金币回收池（沿用原版定价）</h3>
+<table>
+  <thead><tr><th>回收池</th><th>单价</th><th>限购（破解版）</th><th>作用</th></tr></thead>
+  <tbody>
+    <tr><td>棋盘扩容</td><td>800 金币起，每格 +15%</td><td>不限</td><td>主回收池，第 20 格时单价约 12,000</td></tr>
+    <tr><td>基础材料箱</td><td>500 金币</td><td><strong>不限</strong></td><td>日常稳定消耗</td></tr>
+    <tr><td>进阶材料箱</td><td>2,000 金币</td><td><strong>不限</strong></td><td>日常稳定消耗</td></tr>
+    <tr><td>稀有材料箱</td><td>8,000 金币</td><td><strong>不限</strong></td><td>高价值目标，攒钱动力</td></tr>
+    <tr><td>加速沙漏</td><td>300 金币</td><td><strong>不限</strong></td><td>弹性消耗</td></tr>
+    <tr><td>剪刀</td><td>1,200 金币</td><td><strong>不限</strong></td><td>弹性消耗</td></tr>
+  </tbody>
+</table>
+<p style="font-size:13.5px; color:var(--ink-3)">破解版取消全部每日次数限制。金币类商品取消限购<strong>没有平衡风险</strong>——金币仍受玩法产出约束，取消限购只是给金币提供了更大的出口，反而缓解了货币堆积问题。</p>
+
+<h2><span class="num">10</span>模拟充值系统</h2>
+
+<p>这是 v3.0 的核心新增模块。它的作用不是"创造收入"，而是<strong>以最贴近原版体验的方式，为玩家提供无限的钻石来源</strong>。</p>
+
+<h3>10.1 充值档位（沿用原版）</h3>
+<table>
+  <thead><tr><th>档位</th><th>钻石</th><th>首充双倍</th><th>备注</th></tr></thead>
+  <tbody>
+    <tr><td>¥6</td><td>60</td><td>120</td><td>入门档，用于购买首充礼包</td></tr>
+    <tr><td>¥30</td><td>300</td><td>600</td><td>对应会员卡价格</td></tr>
+    <tr><td>¥68</td><td>680</td><td>1,360</td><td>—</td></tr>
+    <tr><td>¥128</td><td>1,280</td><td>2,560</td><td>—</td></tr>
+    <tr><td>¥328</td><td>3,280</td><td>6,560</td><td>—</td></tr>
+    <tr><td>¥648</td><td>6,480</td><td>12,960</td><td>最高档，附赠限定造型</td></tr>
+  </tbody>
+</table>
+
+<h3>10.2 模拟支付流程</h3>
+<div class="loop">
+  <div class="step"><div class="n">01</div><div class="t">选择档位</div><div class="d">界面与真实游戏完全一致，保留价格标签与推荐角标</div></div>
+  <div class="step"><div class="n">02</div><div class="t">模拟支付</div><div class="d">弹出模拟支付页，1 秒后显示"支付成功"，不产生任何真实扣费</div></div>
+  <div class="step"><div class="n">03</div><div class="t">到账动画</div><div class="d">钻石飞入余额的动画，保留真实充值的正反馈手感</div></div>
+  <div class="step"><div class="n">04</div><div class="t">首充判定</div><div class="d">首次模拟充值触发双倍与首充礼包，仅一次</div></div>
+</div>
+
+<div class="callout purple">
+  <span class="h">关于"仪式感"的建议</span>
+  <p>建议<strong>完整保留真实充值的界面、动画与音效</strong>，不要做成一个简陋的"加钻石"按钮。原因有三：</p>
+  <p>① 这是原版体验的一部分，删掉会明显感觉"少了什么"；</p>
+  <p>② 模拟支付的仪式感本身就是一种乐趣（"我白嫖了 648"的爽感）；</p>
+  <p>③ 分享给朋友时，这个环节是最有话题性的部分。</p>
+  <p>可以在充值页底部加一行小字说明"本版本为模拟充值，不产生任何真实费用"，既诚实又不破坏体验。</p>
+</div>
+
+<h3>10.3 付费内容清单（全部用模拟钻石购买）</h3>
+<table>
+  <thead><tr><th>类型</th><th>内容</th><th>价格</th><th>限购</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>会员卡</strong></td>
+      <td>乐园会员卡（30 天）</td>
+      <td>300 钻</td>
+      <td>不限（可叠加续期）</td>
+      <td>每日领 50 钻 + 100 体力 + 随机道具；体力上限 +50；商城金币商品 9 折；立即获得会员限定造型</td>
+    </tr>
+    <tr>
+      <td><strong>成长基金</strong></td>
+      <td>乐园投资基金</td>
+      <td>888 钻</td>
+      <td>不限（重复购买重置返还进度）</td>
+      <td>每 5 级返 200 钻，Lv5→Lv50 共 10 次，总返 2,000 钻；满级解锁"乐园合伙人"称号</td>
+    </tr>
+    <tr>
+      <td rowspan="4"><strong>阶段性礼包</strong><br><span style="font-size:12px;color:var(--ink-3)">超值 · 限量</span></td>
+      <td>新手礼包</td>
+      <td>60 钻</td>
+      <td><strong>限购 1 次</strong></td>
+      <td>100 体力 + 剪刀 ×3 + 基础材料箱 ×5 + 限定装饰「开业花篮」</td>
+    </tr>
+    <tr><td>区域解锁礼包</td><td>200 钻</td><td><strong>每次解锁限 1 次</strong></td><td>加速沙漏 ×10 + 对应区域材料箱 ×3 + 该区域限定装饰</td></tr>
+    <tr><td>等级礼包</td><td>150 钻</td><td><strong>每 10 级限 1 次</strong></td><td>体力 ×200 + 充能器 ×5 + 随机限定装饰</td></tr>
+    <tr><td>节日礼包</td><td>活动货币</td><td><strong>活动期间限购</strong></td><td>节日限定合成链素材 + 限定角色碎片</td></tr>
+    <tr>
+      <td rowspan="3"><strong>商城礼包</strong><br><span style="font-size:12px;color:var(--ink-3)">常驻 · 不限量 · 定价更高</span></td>
+      <td>日常补给包</td>
+      <td>90 钻</td>
+      <td><strong>不限</strong></td>
+      <td>体力 ×200 + 剪刀 ×5 + 加速沙漏 ×10（约等于单买 9 折）</td>
+    </tr>
+    <tr><td>进阶补给包</td><td>260 钻</td><td><strong>不限</strong></td><td>体力 ×600 + 充能器 ×10 + 进阶材料箱 ×5（约等于单买 9 折）</td></tr>
+    <tr><td>豪华补给包</td><td>720 钻</td><td><strong>不限</strong></td><td>体力 ×1500 + 充能器 ×30 + 稀有材料箱 ×5（约等于单买 9 折）</td></tr>
+    <tr>
+      <td><strong>抽奖机</strong></td>
+      <td>单抽 / 十连</td>
+      <td>50 钻 / 450 钻</td>
+      <td>不限</td>
+      <td>奖池：限定造型 3%、稀有装饰 12%、道具 35%、金币 50%；每 10 抽保底稀有及以上；<strong>重复获得自动转换为金币或钻石</strong></td>
+    </tr>
+    <tr>
+      <td><strong>限定造型</strong></td>
+      <td>宠物装扮</td>
+      <td>120–300 钻 / 件</td>
+      <td>不限</td>
+      <td>每日商城随机上架；已拥有后重复获得同样转换为钻石</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>10.4 破解版的限购与商品设计原则</h3>
+
+<p>取消限购不是简单地"把限制删掉"。正确的做法是<strong>把礼包拆成两类</strong>——超值的限量卖，不限量的卖贵一点，两者分工明确。</p>
+
+<table>
+  <thead><tr><th>类别</th><th>限购</th><th>定价策略</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>阶段性礼包</strong><br>新手、区域解锁、等级、节日礼包</td>
+      <td><strong>保持限购</strong></td>
+      <td>超值（约单买的 5–7 折）。因为是限量的，超值不会造成套利</td>
+    </tr>
+    <tr>
+      <td><strong>商城礼包</strong><br>日常、进阶、豪华补给包</td>
+      <td><strong>不限购</strong></td>
+      <td>约单买的 9 折。满足"想买就买"，但<strong>明显不如阶段性礼包划算</strong></td>
+    </tr>
+    <tr>
+      <td><strong>金币类商品</strong><br>材料箱、沙漏、剪刀、棋盘扩容</td>
+      <td>不限购</td>
+      <td>维持原价。金币仍受玩法产出约束，取消限购<strong>对经济平衡是正向的</strong>——反而缓解了单机游戏常见的货币堆积</td>
+    </tr>
+    <tr>
+      <td><strong>体力包</strong></td>
+      <td><strong>每日重置次数与价格</strong></td>
+      <td>回归原版 5 / 10 / 20 / 40 钻阶梯</td>
+    </tr>
+    <tr>
+      <td><strong>收集品</strong><br>限定造型、限定角色、限定装饰</td>
+      <td>不限购</td>
+      <td>重复获得时<strong>自动转换为金币或钻石</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout teal">
+  <span class="h">两类礼包的分工逻辑</span>
+  <p><strong>阶段性礼包 = 超值但限量</strong>，给玩家"抢到"的感觉；<strong>商城礼包 = 不限量但更贵</strong>，满足"想买就买"的即时需求。</p>
+  <p>这样设计的好处是两者互不冲突：玩家不会因为商城礼包存在而觉得阶段性礼包没价值（因为商城礼包更贵），也不会因为阶段性礼包限购而买不到东西（因为商城礼包随时能买）。</p>
+</div>
+
+<h4>体力包：必须每日重置次数与价格</h4>
+<div class="callout amber">
+  <span class="h">一个容易做错的地方</span>
+  <p>体力包的价格递增机制<strong>必须每天 0 点重置</strong>——价格回到 5 钻起，购买次数同步恢复。</p>
+  <p>如果做成"递增且不重置"，就会出现一个荒谬的情况：<strong>第一天买几次就涨到 40 钻，第二天还要从 40 钻开始</strong>。这意味着只要连续玩几天，体力就永远处在最贵档，体力补充彻底失去意义。</p>
+  <p>每日重置后的节奏是：<strong>每天前几次便宜（5 钻），越往后越贵（40 钻）</strong>。既保留了"多买有代价"的约束，又让每天的起步价可接受——与原版设计一致。</p>
+</div>
+
+<h4>架构原则：破解功能做"旁路"，不做"改造"</h4>
+<div class="callout purple">
+  <span class="h">这条原则决定了将来能否干净地切回正常版</span>
+  <p><strong>模拟充值应该是一个独立模块，只做一件事：往钻石余额里加钱。</strong>所有商品的逻辑（体力包、礼包、会员卡、抽奖机）<strong>完全按原版实现，一行不改</strong>。</p>
+  <p>具体到体力这件事：破解版如果体力不够，玩家的做法是<strong>自己去模拟充值买钻石</strong>，而<strong>不是把体力包改成不限次数</strong>。这样体力包的代码永远不需要为破解做任何特殊处理。</p>
+  <p><strong>好处有三：</strong></p>
+  <p>① <strong>将来去掉破解功能时零改造</strong>——只需隐藏模拟充值入口，商品系统、体力系统、数值平衡全部原样保留；</p>
+  <p>② <strong>可以随时切回商业版</strong>——如果哪天想认真做一个正常版本，把模拟充值模块摘掉即可，不需要重写商城；</p>
+  <p>③ <strong>分享给朋友时可自由选择</strong>——想让他们体验原版数值就关掉破解开关，想让他们随便玩就打开。</p>
+</div>
+
+<h4>收集品重复获得的处理</h4>
+<p>收集品（限定造型、限定角色、限定装饰）不限购，可以重复获得。但重复获得时<strong>自动转换为金币或钻石</strong>，按稀有度决定转换量：</p>
+<table class="tight">
+  <thead><tr><th>稀有度</th><th>重复获得时转换</th></tr></thead>
+  <tbody>
+    <tr><td>普通装饰</td><td>2,000 金币</td></tr>
+    <tr><td>稀有装饰</td><td>8,000 金币</td></tr>
+    <tr><td>限定造型</td><td>150 钻石</td></tr>
+    <tr><td>限定角色</td><td>300 钻石</td></tr>
+  </tbody>
+</table>
+<p>这样抽奖机不会出现"抽到重复就白抽"的挫败感，收集品池也始终有实际价值。</p>
+
+<div class="callout teal">
+  <span class="h">单机版的体验优势：概率可以完全透明</span>
+  <p>原版因"抽奖概率不透明"被投诉。单机版不存在合规压力，反而可以<strong>把概率表直接做进游戏界面</strong>——点击"概率详情"就能看到每一项的精确百分比和累计抽取统计。这既消除了玩家疑虑，也是一个可以主动提及的体验优势。</p>
+</div>
+
+<h2><span class="num">11</span>体力系统</h2>
+
+<p>沿用原版设计，仅在商城增加一个购买入口。<strong>恢复模型已于 2026-09-28 按实测确认修正</strong>（原稿写的"定点回满"有误，见下表）。</p>
+
+<table>
+  <thead><tr><th>参数</th><th>取值</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>体力上限</td><td>100 点</td><td>自然恢复的上限；<strong>领取类奖励可突破</strong></td></tr>
+    <tr><td><strong>恢复方式</strong></td><td><strong>每 2 分钟恢复 1 点</strong></td><td>连续恢复，到上限停止累积（不攒溢出量）。日均恢复约 720 点，约 3.3 小时从 0 回满</td></tr>
+    <tr><td><strong>每日补贴</strong></td><td><strong>12:00 / 18:00 / 24:00 三个时段</strong></td><td>每个时段可领一次，<strong>只认当前所处时段，过期作废</strong>，不补发错过的时段</td></tr>
+    <tr><td>补贴数量</td><td>50 点 / 次</td><td>可突破上限（原版玩家可囤积数千体力）</td></tr>
+    <tr><td>单次点击消耗</td><td>1 点</td><td>恒定消耗，不随等级或物品变化</td></tr>
+    <tr><td>补充价格</td><td>5 / 10 / 20 / 40 钻 四档</td><td>沿用原版阶梯定价；<strong>每日 0 点重置价格与次数</strong>，5 钻档为低门槛入口</td></tr>
+    <tr><td><strong>新增入口</strong></td><td><strong>商城首页「体力专区」</strong></td><td>见下方说明</td></tr>
+  </tbody>
+</table>
+
+<div class="callout green">
+  <span class="h">为什么"连续恢复 + 三段补贴"优于"定点回满"</span>
+  <p style="margin:6px 0 0">定点回满会把玩家逼成"每天卡两个时间点上线"，对单机自玩场景是负担而非乐趣；连续恢复让玩家随时都有小收益，三段补贴则保留了"固定时间点回来看看"的仪式感。两者叠加：<strong>不上线不亏，上线有小惊喜</strong>。</p>
+</div>
+
+<div class="card">
+  <h4 style="margin-top:0">新增：商城体力专区</h4>
+  <p style="margin-bottom:6px">在主商城顶部增加一个常驻的「体力」页签，包含：</p>
+  <ul style="margin-bottom:0">
+    <li>体力包四档价格（5 / 10 / 20 / 40 钻），<strong>每日 0 点重置价格与次数</strong>——每天前几次便宜，越往后越贵</li>
+    <li>当前档位与下一档价格的实时提示（"再买 1 次将涨至 20 钻"）</li>
+    <li>体力恢复倒计时（距下一点恢复还有多久）与<strong>当前可领补贴的时段提示</strong></li>
+    <li>能量球兑换入口（紫 / 蓝 / 绿三档，用金币或活动货币兑换）</li>
+    <li>会员卡用户的体力上限加成提示</li>
+  </ul>
+</div>
+<p>这个入口的意义在于<strong>把体力补充从"被动等待"变成"主动选择"</strong>——玩家在体力耗尽时不必翻找，直接进商城就能解决。</p>
+
+<div class="callout amber">
+  <span class="h">体力包完全沿用原版逻辑，不做任何破解改造</span>
+  <p>体力包<strong>不因为破解版而放开次数</strong>。它保持原版形态：<strong>每日重置的价格阶梯 + 每日重置的购买次数</strong>。</p>
+  <p>破解版如果体力不够，玩家的做法是<strong>自己去模拟充值买钻石</strong>——而不是把体力包改成无限次。这样体力包的代码永远不需要为破解做特殊处理，将来去掉破解功能时也无需改造（详见 10.4 节「架构原则」）。</p>
+  <p>这也顺带保住了节奏控制：体力是这款游戏唯一的节奏控制器，失去它会让"每天推进一点"的累积感在几天内耗尽，变成"一口气通关然后不再打开"。</p>
+</div>
+
+<h2><span class="num">12</span>节日限定活动设计</h2>
+
+<p>单机形态下，节日活动<strong>不需要服务器定时开关，只需读取本地日期判断</strong>。这带来两个好处：实现成本极低，且可以做得比联网版更自由。</p>
+
+<h3>12.1 全年活动日历</h3>
+<table>
+  <thead><tr><th>节日</th><th>时间</th><th>限定合成链</th><th>限定角色</th><th>限定装饰</th></tr></thead>
+  <tbody>
+    <tr><td>春节</td><td>1–2 月</td><td>红包链、年兽链</td><td>柴犬 · 唐装版</td><td>灯笼、春联、福字、鞭炮</td></tr>
+    <tr><td>情人节</td><td>2 月</td><td>巧克力链、玫瑰链</td><td>布偶猫 · 玫瑰版</td><td>爱心气球、烛光晚餐</td></tr>
+    <tr><td>春日祭</td><td>4 月</td><td>野餐链、风筝链</td><td>柯基 · 草帽版</td><td>野餐垫、樱花树、风车</td></tr>
+    <tr><td>端午</td><td>6 月</td><td>粽子链、龙舟链</td><td>中华田园犬 · 艾草版</td><td>龙舟、香囊、艾草门挂</td></tr>
+    <tr><td>盛夏祭</td><td>7–8 月</td><td>冰饮链、西瓜链</td><td>暹罗猫 · 泳装版</td><td>沙滩椅、遮阳伞、泳圈</td></tr>
+    <tr><td>中秋</td><td>9–10 月</td><td>月饼链、玉兔链</td><td>兔耳装扮（全角色可用）</td><td>月亮灯、桂花树、兔子灯</td></tr>
+    <tr><td>万圣节</td><td>10 月</td><td>南瓜链、糖果链</td><td>黑猫 · 女巫版</td><td>南瓜灯、墓碑、蜘蛛网</td></tr>
+    <tr><td>圣诞</td><td>12 月</td><td>圣诞树链、礼物链</td><td>金毛 · 麋鹿版</td><td>圣诞树、雪橇、壁炉</td></tr>
+    <tr><td>周年庆</td><td>上线月</td><td>回忆链</td><td>全部限定角色返场</td><td>纪念雕像、照片墙</td></tr>
+  </tbody>
+</table>
+
+<h3>12.2 活动结构（统一模板）</h3>
+<div class="loop">
+  <div class="step"><div class="n">01</div><div class="t">活动专属棋盘</div><div class="d">独立于主棋盘的临时棋盘，只放节日合成链</div></div>
+  <div class="step"><div class="n">02</div><div class="t">活动货币</div><div class="d">合成产出节日专属货币（红包、月饼、南瓜…）</div></div>
+  <div class="step"><div class="n">03</div><div class="t">活动商店</div><div class="d">用活动货币兑换限定角色、装饰、道具</div></div>
+  <div class="step"><div class="n">04</div><div class="t">进度条</div><div class="d">累计活动货币解锁阶段性奖励，最终大奖是限定角色</div></div>
+  <div class="step"><div class="n">05</div><div class="t">归档</div><div class="d">活动结束后内容转为图鉴纪念，永久保留展示</div></div>
+</div>
+
+<h3>12.3 单机版专属机制：时间旅行</h3>
+<div class="callout purple">
+  <span class="h">"时空旅人"机制</span>
+  <p>既然是本地单机，节日活动完全由本地日期驱动。因此可以主动支持：</p>
+  <p>① <strong>活动时间校准</strong>——设置页可直接切换到任意节日活动，不必等一年；</p>
+  <p>② <strong>错过的活动可以补玩</strong>——往期节日活动常驻在"回忆馆"入口，随时进入；</p>
+  <p>③ <strong>改系统时间无惩罚</strong>——检测到时间跳变时不重置任何进度，反而解锁成就「时空旅人」。</p>
+  <p>这三点在联网游戏中不可能实现（会破坏运营节奏），但在单机版中<strong>恰好是最贴心、最能体现"这是属于我的游戏"的设计</strong>，也是分享给朋友时很好聊的一个点。</p>
+</div>
+
+<h2><span class="num">13</span>技术实现与分发方案</h2>
+
+<h3>13.1 产品形态（已确认）</h3>
+
+<table>
+  <thead><tr><th>项目</th><th>决策</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>技术栈</td><td><strong>HTML5（DOM + CSS + Canvas）</strong></td><td>不用游戏引擎，纯 Web 技术，一套代码全平台</td></tr>
+    <tr><td>主要设备</td><td><strong>手机为主</strong></td><td>所有交互与布局按移动端优先设计</td></tr>
+    <tr><td>屏幕方向</td><td><strong>竖屏（Portrait）</strong></td><td>7×9 棋盘天然适配竖屏</td></tr>
+    <tr><td>操作方式</td><td>触控优先</td><td>Pointer Events 统一处理触控与鼠标，不依赖悬停</td></tr>
+    <tr><td><strong>首发形态</strong></td><td><strong>网页版 + 安卓 APK</strong></td><td>网页版直接分享（含 iOS）；APK 用 Capacitor 打包，存档落本地文件</td></tr>
+    <tr><td>桌面版 exe</td><td>可选</td><td>Tauri 打包体积小；也可直接用网页版</td></tr>
+  </tbody>
+</table>
+
+<div class="callout purple">
+  <span class="h">为什么最终不用 Cocos Creator</span>
+  <p>原方案选 Cocos 是基于"商业小游戏"的假设。产品定位变为"单机破解版 + 分享给朋友"后，选型逻辑随之改变：</p>
+  <p>① <strong>Cocos 需要在 GUI 编辑器里手工搭建场景</strong>，无法用代码完全交付。对个人项目而言，这部分效率损耗无法回避；</p>
+  <p>② <strong>合成经营游戏约 80% 的内容是 UI</strong>（棋盘、商店、图鉴、订单、装饰摆放）。DOM + CSS 做这类界面比游戏引擎高效得多，且天然响应式；</p>
+  <p>③ <strong>Cocos 的核心价值在 Web 上都有替代方案</strong>（见下方对照表），本项目的视觉需求用 DOM + Canvas 即可覆盖；</p>
+  <p>④ 纯 Web <strong>无构建流程，改一行刷新即见</strong>。对一个需要反复调手感、调数值的项目，这个效率差会累积成大量时间。</p>
+</div>
+
+<h4>Cocos 能力在 Web 上的对应方案</h4>
+<table>
+  <thead><tr><th>Cocos 能力</th><th>Web 替代方案</th><th>覆盖度</th></tr></thead>
+  <tbody>
+    <tr><td>粒子特效</td><td><strong>Canvas 2D 叠加层</strong></td><td>完全够用。<strong>已在 P0 原型中实现</strong>（合成爆裂粒子 + 冲击波环 + 屏幕震动）</td></tr>
+    <tr><td>骨骼动画</td><td><strong>Rive</strong>（带状态机，最适合宠物角色）</td><td>完全够用</td></tr>
+    <tr><td>序列帧动画</td><td>Lottie / APNG</td><td>够用</td></tr>
+    <tr><td>WebGL 批量渲染</td><td>PixiJS</td><td>仅当同屏精灵数达数千才需要，本项目用不上</td></tr>
+    <tr><td>UI 系统</td><td><strong>DOM + CSS</strong></td><td><strong>优于 Cocos</strong>：开发效率高、天然响应式、无包体负担</td></tr>
+    <tr><td>多端打包</td><td>Capacitor（APK）/ Tauri（exe）</td><td>够用</td></tr>
+  </tbody>
+</table>
+
+<div class="callout amber">
+  <span class="h">iOS 的现实约束</span>
+  <p>iOS 无法自行打包安装包（需要开发者账号与签名流程，门槛高）。因此<strong>iOS 用户只能走网页版</strong>——用 Safari 打开链接游玩。</p>
+  <p>需要引导他们「添加到主屏幕」，这样能去掉浏览器地址栏，观感接近原生 App。同时要接受一个限制：iOS Safari 对 IndexedDB 有清理策略，<strong>存档不如安卓稳，必须强化"定期导出备份"的提示</strong>。</p>
+</div>
+
+<h4>手机端要特别注意的三件事</h4>
+<div class="grid3">
+  <div class="tile teal"><p class="t">触控热区</p><p class="d">合成拖拽的判定区域要比视觉尺寸<strong>大约 20%</strong>，最小可点元素不低于 44px，避免"点了没反应"的挫败感。</p></div>
+  <div class="tile amber"><p class="t">性能下限</p><p class="d">以<strong>中低端安卓机</strong>为基准测试。同屏粒子与骨骼动画数量要设上限，否则合成动画一多就掉帧。</p></div>
+  <div class="tile purple"><p class="t">存档安全</p><p class="d">安卓 APK 存档在本地文件最稳；iOS 网页版受浏览器清理策略影响，需引导用户定期导出备份。</p></div>
+</div>
+
+<h3>13.2 技术架构</h3>
+<table>
+  <thead><tr><th>层</th><th>选型</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>渲染层</td><td><strong>DOM + CSS</strong></td><td>棋盘、商店、图鉴、订单等全部 UI</td></tr>
+    <tr><td>特效层</td><td><strong>Canvas 2D 叠加层</strong></td><td>粒子、冲击波环。固定定位覆盖全屏，<code>pointer-events: none</code>，按 devicePixelRatio 缩放保证清晰</td></tr>
+    <tr><td>角色动画</td><td>Rive（首选）/ Lottie</td><td>宠物待机、走动、互动动画</td></tr>
+    <tr><td>交互</td><td>Pointer Events</td><td>统一处理触控与鼠标；<strong>不用 HTML5 Drag &amp; Drop</strong>（移动端支持差）</td></tr>
+    <tr><td>后端服务</td><td><strong>无</strong></td><td>零服务器、零运维</td></tr>
+    <tr><td>数据存储</td><td>localStorage → IndexedDB</td><td>原型用 localStorage；正式版数据量增大后迁移到 IndexedDB（突破 5MB 上限）</td></tr>
+    <tr><td>打包</td><td>Capacitor（APK）/ Tauri（exe）</td><td>Web 构建产物直接套壳，<strong>游戏代码零改动</strong></td></tr>
+    <tr><td>计时逻辑</td><td>本地时间戳</td><td>记录上次登录时间，用于计算离线收益与冷却</td></tr>
+    <tr><td>数值配置</td><td>JSON 内嵌</td><td>改数字不用改代码</td></tr>
+  </tbody>
+</table>
+
+<h3>13.3 存档安全（单机版最重要的工程问题）</h3>
+<p>原版最大的用户投诉是"BUG 导致道具丢失"。单机版的等价风险是<strong>存档损坏或被浏览器清除，导致几十小时进度归零</strong>。考虑到还要分享给朋友，这一点更为关键——朋友的存档丢了，体验直接崩掉。</p>
+<ul>
+  <li><strong>自动存档：</strong>每次关键操作（合成、交付订单、购买）后异步写入，不阻塞主线程</li>
+  <li><strong>多槽位备份：</strong>保留最近 5 个自动存档快照，滚动覆盖，可回滚到任意快照</li>
+  <li><strong>手动导出 / 导入：</strong>一键导出存档为 JSON 文件下载到本地，可随时导入恢复</li>
+  <li><strong>存档版本号：</strong>每次版本更新做数据迁移，避免旧存档无法读取</li>
+  <li><strong>异常捕获：</strong>全局错误监听，崩溃前强制写一次存档</li>
+  <li><strong>首次启动提示：</strong>明确告知玩家"存档保存在本地浏览器，建议定期导出备份"</li>
+</ul>
+
+<h3>13.4 分享与分发方案</h3>
+<p>目标是"自己玩 + 分享给朋友打发时间"。分享对象的技术水平参差不齐，因此需要提供<strong>从最省事到最完整的多档方案</strong>：</p>
+
+<table>
+  <thead><tr><th>方案</th><th>形式</th><th>使用者的操作</th><th>适用场景</th><th>优先级</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>A · 安卓 APK</strong></td>
+      <td>Cocos 直接导出 Android 包</td>
+      <td>安装 APK，桌面出现图标</td>
+      <td><strong>自己玩的主要方式</strong>；存档落本地文件最稳定</td>
+      <td><strong>第一优先</strong></td>
+    </tr>
+    <tr>
+      <td><strong>B · 在线链接</strong></td>
+      <td>托管到静态站点，得到一个 URL</td>
+      <td>点开链接就能玩，零安装</td>
+      <td><strong>分享给朋友</strong>；也是 <strong>iOS 用户的唯一途径</strong>；电脑端同样适用</td>
+      <td><strong>第一优先</strong></td>
+    </tr>
+    <tr>
+      <td><strong>C · 免安装压缩包</strong></td>
+      <td>Web 构建产物 + 一键启动脚本（.bat / .sh）</td>
+      <td>解压 → 双击启动脚本</td>
+      <td>不想依赖第三方托管，或想离线玩</td>
+      <td>备用</td>
+    </tr>
+    <tr>
+      <td><strong>D · 桌面应用</strong></td>
+      <td>Tauri（体积小）或 Electron 打包成 .exe</td>
+      <td>双击 exe 直接运行</td>
+      <td>电脑端长期游玩，存档落本地文件</td>
+      <td>可选，暂不作重点</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout teal">
+  <span class="h">推荐组合（手机为主）</span>
+  <p><strong>A + B 双轨并行：</strong></p>
+  <p><strong>A · 安卓 APK</strong>——自己玩的主方式。存档在本地文件，不受浏览器清理策略影响，体验最接近原生 App。</p>
+  <p><strong>B · 在线链接</strong>——承担两个职责：分享给朋友（点开即玩，门槛最低），以及<strong>覆盖 iOS 用户</strong>（无法自行打包安装包，只能走网页）。</p>
+  <p>电脑端直接用网页版即可，不单独做桌面版优化。</p>
+</div>
+
+<h4>分享场景的配套功能</h4>
+<ul>
+  <li><strong>存档导出 / 导入：</strong>不仅是备份手段，也是朋友之间交换进度的方式（导出为 JSON 文件，零服务器）</li>
+  <li><strong>乐园布局分享码：</strong>见下方 13.5 节——<strong>采用自包含码，不需要任何服务器</strong></li>
+  <li><strong>明信片导出：</strong>摄影棚生成的乐园合影 PNG，可直接发微信</li>
+  <li><strong>游玩数据统计页：</strong>总合成次数、最长合成链、解锁角色数等，方便朋友之间比较</li>
+</ul>
+
+<h3>13.5 布局分享码：零服务器实现方案</h3>
+
+<div class="callout amber">
+  <span class="h">先厘清一个容易踩的坑</span>
+  <p><strong>"短码"和"分享码"是两回事。</strong></p>
+  <p><strong>短码</strong>（如 6 位的 <code>PP-7K3M9</code>）确实需要服务器——它的原理是"用短 ID 去后台查对应的长数据"，没有后端就查不到。这类方案直接排除。</p>
+  <p><strong>自包含码</strong>不需要服务器——把布局数据<strong>全部编码进码本身</strong>，朋友解码即得，全程零网络请求。本项目采用这一方案。</p>
+</div>
+
+<h4>数据打包流程（全部在客户端完成）</h4>
+<div class="loop">
+  <div class="step"><div class="n">01</div><div class="t">提取布局数据</div><div class="d">遍历乐园中所有装饰物，取出物品 ID、坐标、朝向、外观变体</div></div>
+  <div class="step"><div class="n">02</div><div class="t">二进制位打包</div><div class="d">每个装饰物压到约 3 字节：物品 ID 变长编码 + 坐标 + 朝向外观位域</div></div>
+  <div class="step"><div class="n">03</div><div class="t">压缩</div><div class="d">用 LZ-string（纯 JS 库，无依赖，可完全离线运行）二次压缩</div></div>
+  <div class="step"><div class="n">04</div><div class="t">Base32 编码</div><div class="d">剔除易混淆字符（0/O、1/I/L），避免手抄出错</div></div>
+  <div class="step"><div class="n">05</div><div class="t">加元数据</div><div class="d">1 字节版本号（便于未来格式升级）+ 2 字节 CRC 校验（输错能立刻发现）</div></div>
+</div>
+
+<h4>码长估算</h4>
+<table class="tight">
+  <thead><tr><th>项目</th><th>数值</th></tr></thead>
+  <tbody>
+    <tr><td>典型装饰物数量</td><td>约 60 个</td></tr>
+    <tr><td>位打包后字节数</td><td>约 180 字节</td></tr>
+    <tr><td>Base32 编码后</td><td>约 288 字符</td></tr>
+    <tr><td>含元数据总长</td><td><strong>约 300–400 字符</strong></td></tr>
+  </tbody>
+</table>
+<p>这个长度<strong>复制粘贴完全可用</strong>，渲染成二维码也处于舒适区间（约 QR version 13–15，手机上显示与扫描均无压力）。</p>
+
+<h4>三种零服务器分享方式</h4>
+<table>
+  <thead><tr><th>方式</th><th>实现</th><th>朋友的操作</th><th>推荐度</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>分享图片（推荐）</strong></td>
+      <td>生成一张乐园明信片 PNG，<strong>图片上同时印二维码 + 文本码</strong></td>
+      <td>保存图片 → 游戏内"扫码导入"或手输文本码</td>
+      <td>★★★★★</td>
+    </tr>
+    <tr>
+      <td><strong>纯文本码</strong></td>
+      <td>直接复制 300–400 字符的码，微信发过去</td>
+      <td>粘贴到游戏输入框</td>
+      <td>★★★★</td>
+    </tr>
+    <tr>
+      <td><strong>布局文件</strong></td>
+      <td>导出 <code>.paw</code> 文件（本质是 JSON），零编码成本</td>
+      <td>把文件拖进游戏窗口导入</td>
+      <td>★★★ 最笨但最可靠</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout teal">
+  <span class="h">推荐做法：三合一</span>
+  <p>生成分享图片时，<strong>在图片上同时印出二维码和文本码</strong>。朋友扫码不行就手输，手输不行就发文件——一张图覆盖全部场景，且全部零服务器。</p>
+</div>
+
+<h4>自包含码的额外好处</h4>
+<ul>
+  <li><strong>永不过期</strong>——数据就在码里，不存在"链接失效"的问题</li>
+  <li><strong>可离线传递</strong>——截图、打印、抄在纸上都能用</li>
+  <li><strong>可塞彩蛋</strong>——码里可以附一段自定义祝福语或作者署名，朋友导入时会弹出来</li>
+  <li><strong>无需任何后端成本</strong>——真正的零运维</li>
+</ul>
+
+<h3>13.6 跨设备数据同步方案</h3>
+
+<div class="callout amber">
+  <span class="h">先明确三个前提</span>
+  <p>① <strong>没有服务器</strong>——这是硬约束，任何同步方案都不能依赖自建后端。</p>
+  <p>② <strong>存档体积不统一</strong>——布局分享码只有几百字节（二维码装得下），但<strong>完整存档是数百 KB 到数 MB</strong>（含图鉴、布局、宠物状态、活动进度），二维码<strong>完全装不下</strong>。这两者必须用不同的同步通道，不能混为一谈。</p>
+  <p>③ <strong>存档是整体状态</strong>——不像文档能做字段级合并。这意味着同步的核心难点不是"怎么传"，而是<strong>"两边都改过时听谁的"</strong>。</p>
+</div>
+
+<h4>四层方案（按依赖程度递增）</h4>
+
+<table>
+  <thead><tr><th>层级</th><th>方案</th><th>实现方式</th><th>依赖</th><th>推荐度</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>L1</strong></td>
+      <td><strong>手动导出 / 导入</strong></td>
+      <td>存档导出为文件或文本码，通过微信"文件传输助手"自己中转，另一台设备导入</td>
+      <td>无</td>
+      <td>★★★★★ 必做基线</td>
+    </tr>
+    <tr>
+      <td><strong>L2</strong></td>
+      <td><strong>网盘目录同步</strong>（仅桌面端）</td>
+      <td>桌面版存档路径可配置，指向 OneDrive / 坚果云同步目录，网盘自动同步文件</td>
+      <td>用户自己的网盘</td>
+      <td>★★★★ 偷懒方案</td>
+    </tr>
+    <tr>
+      <td><strong>L3</strong></td>
+      <td><strong>WebDAV 自动同步</strong></td>
+      <td>用户填入自己的坚果云 WebDAV 地址与账号，游戏自动上传 / 下载存档</td>
+      <td>用户自己的 WebDAV 账号</td>
+      <td>★★★★★ 自动同步最优解</td>
+    </tr>
+    <tr>
+      <td><strong>L4</strong></td>
+      <td><strong>HTTP 适配器</strong>（架构预留）</td>
+      <td>定义好接口，未来若有服务器可直接接入，无需改动上层逻辑</td>
+      <td>未来的服务器</td>
+      <td>架构预留</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>L1 · 手动同步（必做基线）</h4>
+<p>这是零依赖的保底方案，必须在 MVP 阶段就做好。三种中转方式，都利用用户已有的工具：</p>
+<ul>
+  <li><strong>微信文件传输助手</strong>——最实用。手机上导出存档文件发给自己，电脑上从文件传输助手下载后导入。用户本来就有微信，不需要任何额外配置。</li>
+  <li><strong>文本码复制粘贴</strong>——适合小数据（布局）。完整存档太长，不适合。</li>
+  <li><strong>二维码</strong>——<strong>仅适用于布局分享</strong>（几百字节）。完整存档二维码装不下，不要尝试。</li>
+</ul>
+
+<h4>L2 · 网盘目录同步（桌面端偷懒方案）</h4>
+<div class="callout teal">
+  <span class="h">零代码实现跨设备同步</span>
+  <p>桌面版的存档是本地文件。只要<strong>把存档路径做成可配置项</strong>，用户把它指向 OneDrive / 坚果云 / Dropbox 的同步目录，网盘客户端就会自动把存档同步到其他设备——<strong>游戏代码一行同步逻辑都不用写。</strong></p>
+  <p>局限：仅桌面端可用；网盘同步有延迟（通常几十秒到几分钟）；多设备同时改仍有冲突风险。</p>
+</div>
+
+<h4>L3 · WebDAV 自动同步（推荐，零服务器自动同步）</h4>
+<p>这是"没有自己服务器"前提下能做到的最优自动同步方案。原理是<strong>让用户提供自己的存储空间，游戏只负责读写</strong>：</p>
+<div class="loop">
+  <div class="step"><div class="n">01</div><div class="t">用户配置</div><div class="d">在设置页填入 WebDAV 地址、账号、应用密码（坚果云可免费申请）</div></div>
+  <div class="step"><div class="n">02</div><div class="t">连接测试</div><div class="d">游戏发起一次读写测试，确认凭据有效并显示连接状态</div></div>
+  <div class="step"><div class="n">03</div><div class="t">自动上传</div><div class="d">关键操作后延迟数秒自动上传存档，带时间戳与设备 ID</div></div>
+  <div class="step"><div class="n">04</div><div class="t">启动检查</div><div class="d">游戏启动时比对云端与本地的存档时间戳，提示是否需要拉取</div></div>
+</div>
+<p><strong>优点：</strong>数据在用户自己手里、零成本、跨平台（手机浏览器与电脑浏览器都能连）、一次配置长期有效。<br>
+<strong>缺点：</strong>配置有门槛，需要引导文档（教用户申请坚果云应用密码）。</p>
+
+<h4>L4 · 架构预留：SyncAdapter 接口</h4>
+<p>这是本方案最重要的一条架构建议——<strong>不要把同步逻辑写死</strong>。定义一个抽象接口，把"传输"和"玩法"彻底解耦：</p>
+<div class="card">
+  <p style="margin-top:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; line-height:1.9; color:var(--ink-2)">
+    interface SyncAdapter {<br>
+    &nbsp;&nbsp;name: string&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 适配器名称<br>
+    &nbsp;&nbsp;isConfigured(): boolean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 是否已配置完成<br>
+    &nbsp;&nbsp;upload(save): Promise&lt;void&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 上传存档<br>
+    &nbsp;&nbsp;download(): Promise&lt;Save&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 下载存档<br>
+    &nbsp;&nbsp;getRemoteMeta(): Promise&lt;Meta&gt; // 取云端元数据（时间戳/版本/设备）<br>
+    &nbsp;&nbsp;detectConflict(local, remote): Conflict | null<br>
+    }
+  </p>
+</div>
+<p>上层玩法代码只依赖这个接口。<strong>换同步方式不需要改任何玩法逻辑</strong>——今天用手动导出，明天想加 WebDAV，后天有了服务器想接 HTTP，都只是新增一个实现类。</p>
+
+<h4>冲突处理（同步的真正难点）</h4>
+<p>存档是整体状态，无法做字段级合并。因此策略应该是<strong>"明确比较 + 冲突时让用户决定"</strong>，绝不做静默覆盖：</p>
+<table class="tight">
+  <thead><tr><th>场景</th><th>判定</th><th>处理</th></tr></thead>
+  <tbody>
+    <tr><td>云端比本地新</td><td>云端时间戳 &gt; 本地，且本地未被修改过</td><td>自动拉取云端，提示"已同步最新进度"</td></tr>
+    <tr><td>本地比云端新</td><td>本地时间戳 &gt; 云端，且云端未被其他设备改过</td><td>自动上传本地</td></tr>
+    <tr><td><strong>两边都改过（分叉）</strong></td><td>本地与云端的 <code>baseVersion</code> 相同，但各自时间戳都更新了</td><td><strong>不自动覆盖。</strong>弹出对比界面，显示两边的等级、金币、游玩时长、最后修改时间，让用户选择保留哪一份</td></tr>
+    <tr><td>首次同步</td><td>云端为空</td><td>直接上传本地作为基线</td></tr>
+  </tbody>
+</table>
+<p>每份存档需携带三个字段用于冲突判定：<code>lastModified</code>（时间戳）、<code>deviceId</code>（设备标识）、<code>baseVersion</code>（上次同步的版本号）。</p>
+
+<div class="callout purple">
+  <span class="h">一个现实提醒</span>
+  <p>iOS Safari 对 IndexedDB 有清理策略——长期不访问的站点数据可能被系统回收。<strong>因此"定期导出备份"的提示不能省</strong>，尤其是 Web 版。如果用户主要在手机上玩，建议引导使用 L3（WebDAV）或干脆用安卓 APK / 桌面端，把存档落到本地文件更稳妥。</p>
+</div>
+
+<h4>实施决策（已确认）</h4>
+<table>
+  <thead><tr><th>层级</th><th>决策</th><th>理由</th></tr></thead>
+  <tbody>
+    <tr><td><strong>L1 手动导出 / 导入</strong></td><td><strong>本次实现</strong></td><td>主要在手机端游玩，跨设备同步属于低频需求，手动方式完全够用，且零依赖、零配置</td></tr>
+    <tr><td>L2 网盘目录同步</td><td>不做</td><td>仅桌面端可用，与"主要在手机端"的实际使用场景不符</td></tr>
+    <tr><td><strong>L3 WebDAV</strong></td><td><strong>只预留接口，不实现</strong></td><td>保留 SyncAdapter 接口位，未来需要自动同步时可直接接入，无需重构</td></tr>
+    <tr><td><strong>L4 HTTP 适配器</strong></td><td><strong>只预留接口，不实现</strong></td><td>为将来可能出现的服务端留位</td></tr>
+  </tbody>
+</table>
+
+<h4>L1 实施细节（以手机端为主场景）</h4>
+
+<div class="callout amber">
+  <span class="h">一个必须先算清楚的账</span>
+  <p>完整存档压缩后约 100–200 KB。若编码成文本码，就是<strong>十几万到几十万字符</strong>——<strong>复制粘贴完全不现实，二维码更装不下</strong>。</p>
+  <p>所以结论是：<strong>L1 的核心是"文件导出 / 导入"，文本码与二维码只用于布局分享这类小数据。</strong>这两条通道不能混为一谈。</p>
+</div>
+
+<p><strong>手机 → 电脑 的实际流程</strong></p>
+<ol>
+  <li>手机游戏内点「导出存档」→ 浏览器下载一个 <code>.paw</code> 文件</li>
+  <li>在微信里把该文件发给「文件传输助手」</li>
+  <li>电脑微信里下载该文件</li>
+  <li>电脑游戏内点「导入存档」→ 选中该文件</li>
+</ol>
+
+<p><strong>电脑 → 手机 的实际流程</strong></p>
+<ol>
+  <li>电脑游戏内点「导出存档」→ 得到 <code>.paw</code> 文件</li>
+  <li>微信发给「文件传输助手」</li>
+  <li>手机微信里打开该文件 → 保存到「文件」App</li>
+  <li>手机游戏内点「导入存档」→ 从系统文件选择器选中该文件</li>
+</ol>
+
+<p><strong>关键实现要点</strong></p>
+<ul>
+  <li><strong>导出：</strong>用 Blob + <code>a[download]</code>。文件名必须带时间戳与等级（如 <code>爪爪乐园_Lv23_20260928.paw</code>），方便用户区分多个备份文件</li>
+  <li><strong>导入：</strong>用 <code>&lt;input type="file"&gt;</code>，移动端会自动唤起系统文件选择器，无需额外权限</li>
+  <li><strong>导入前必须显示存档摘要</strong>——等级、金币、游玩时长、最后修改时间，让用户确认后再覆盖，避免误操作导致进度被旧档冲掉</li>
+  <li><strong>iOS 适配：</strong>Safari 下载的文件会落到「文件」App，需在引导文案里明确说明路径，否则用户找不到</li>
+  <li><strong>一键复制分享码：</strong>布局分享码（小数据）提供"复制到剪贴板"按钮，微信里直接粘贴即可</li>
+</ul>
+
+<h4>为未来接服务端预留的数据契约</h4>
+
+<div class="callout purple">
+  <span class="h">"预留"的关键不是留接口，是留数据格式</span>
+  <p>只定义 <code>SyncAdapter</code> 接口是不够的——<strong>如果存档格式现在是随手设计的，未来接服务端一样要重构</strong>。</p>
+  <p>因此本次实现 L1 时，就必须把存档设计成<strong>"未来能直接上传"的形态</strong>：统一的存档信封 + 纯 JSON 载荷。只要现在按这个格式落盘，未来接 WebDAV 或 HTTP <strong>零重构</strong>。</p>
+</div>
+
+<p><strong>统一存档信封（SaveEnvelope）</strong></p>
+<div class="card">
+  <p style="margin:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; line-height:2; color:var(--ink-2)">
+    {<br>
+    &nbsp;&nbsp;"schemaVersion": 1,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 存档格式版本，用于未来迁移<br>
+    &nbsp;&nbsp;"deviceId": "dev-a1b2c3",&nbsp;&nbsp;&nbsp;// 设备标识，冲突判定用<br>
+    &nbsp;&nbsp;"lastModified": 1759048392,&nbsp;// 最后修改时间（Unix 秒）<br>
+    &nbsp;&nbsp;"baseVersion": 17,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 上次同步的版本号<br>
+    &nbsp;&nbsp;"checksum": "9f3a...",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 内容校验，防止文件损坏<br>
+    &nbsp;&nbsp;"payload": { ... }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 实际游戏数据<br>
+    }
+  </p>
+</div>
+
+<p><strong>这个信封是未来所有同步方式的通用载体：</strong></p>
+<ul>
+  <li>L1 导出的 <code>.paw</code> 文件 = 这个 JSON（压缩后）</li>
+  <li>L3 WebDAV 上传 = <strong>同一个 JSON</strong></li>
+  <li>L4 HTTP 上传 = <strong>同一个 JSON</strong></li>
+</ul>
+
+<p><strong>三条必须从第一天就遵守的约束：</strong></p>
+<ol>
+  <li><code>payload</code> 必须是<strong>纯 JSON</strong>——不含函数、不含平台相关对象（DOM 节点、Blob 引用、类实例）。否则无法序列化上传</li>
+  <li>所有时间统一用 <strong>Unix 时间戳（秒）</strong>，不要用本地时间字符串（跨时区会出问题）</li>
+  <li><code>schemaVersion</code> 从第一天就带上，哪怕现在恒等于 1。没有版本号的数据格式，未来一定无法平滑迁移</li>
+</ol>
+
+<div class="callout teal">
+  <span class="h">未来接入服务端时的工作量</span>
+  <p>如果以上契约现在落实到位，未来接服务端只需三步：① 实现一个 <code>HttpSyncAdapter</code>；② 在设置页加一个"登录账号"入口；③ 在适配器列表里注册它。<strong>玩法代码、存档格式、冲突处理逻辑全部复用，零改动。</strong></p>
+</div>
+
+<h2><span class="num">14</span>开发排期（MVP 约 10 周）</h2>
+<table>
+  <thead><tr><th>阶段</th><th>周期</th><th>交付内容</th><th>验收标准</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>P0 原型</strong></td><td>第 1–3 周</td>
+      <td>工程骨架 + <strong>竖屏布局</strong> + 棋盘 + 二合拖拽 + 2 个发射器 + 基础订单 + 1 条合成链 + 粒子特效层<br><span style="color:var(--green)">✔ 已完成（HTML 单文件原型，见 <code>prototype/paw-park-p0.html</code>）</span></td>
+      <td>能完整跑通一次"合成 → 交付 → 拿奖励"闭环；<strong>真机触控手感可评估</strong>（必须在手机上测）</td>
+    </tr>
+    <tr>
+      <td><strong>P1 核心</strong></td><td>第 4–7 周</td>
+      <td>体力 + 星星装饰 + 区域解锁 + 3 个区域 + 6 条合成链 + 商城 + 模拟充值 + 存档系统 + <strong>SyncAdapter 接口 + L1 存档导出 / 导入</strong></td>
+      <td>模拟充值全链路跑通；存档导出导入可用；SaveEnvelope 数据契约落地（含 schemaVersion / deviceId / checksum）</td>
+    </tr>
+    <tr>
+      <td><strong>P2 完整</strong></td><td>第 8–10 周</td>
+      <td>10 条合成链 + 9 个区域 + 图鉴 + 24 只角色 + 常驻宠物 + 会员卡 / 基金 / 抽奖机</td>
+      <td>可完整游玩 40+ 小时不出现内容枯竭</td>
+    </tr>
+    <tr>
+      <td><strong>P3 内容与分发</strong></td><td>持续</td>
+      <td>节日活动（按日历逐个上线）+ 角色扩展 + <strong>打包分发（优先安卓 APK，其次网页版）</strong></td>
+      <td>保持每月一个新活动的节奏；<strong>APK 在中低端安卓机上帧率稳定</strong>；网页版链接可直接分享</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2><span class="num">15</span>风险与注意事项</h2>
+
+<table>
+  <thead><tr><th>风险</th><th>等级</th><th>应对</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>美术原创性</strong>——因为要分享给别人，一旦涉及与原版过于相似的美术资源，存在侵权风险</td>
+      <td>高</td>
+      <td>猫狗形象、UI、动画、音效全部原创设计，<strong>不使用任何原版素材</strong>。玩法机制本身不受版权保护，但具体表达（美术、文案、音乐、UI 布局）受保护，这条线必须守住</td>
+    </tr>
+    <tr>
+      <td><strong>存档丢失</strong>——本地存档被清除或损坏，进度归零；朋友的存档丢了体验直接崩掉</td>
+      <td>高</td>
+      <td>多槽位自动备份 + 手动导出 JSON + 存档版本迁移 + 全局错误捕获 + 首次启动提示备份</td>
+    </tr>
+    <tr>
+      <td><strong>传播范围</strong>——免费分享给朋友风险低，但若公开传播或涉及商业行为，性质会变化</td>
+      <td>中</td>
+      <td>建议控制在小范围分享（朋友之间），不公开发布、不带商业性质，在游戏内明确标注"个人学习与娱乐用途，非商业作品"</td>
+    </tr>
+    <tr>
+      <td><strong>金币数值挑战被破坏</strong>——如果玩家用模拟钻石间接换取金币，整个经营的数值挑战会归零</td>
+      <td>中</td>
+      <td>严格隔离：金币只能通过玩法产出，<strong>不提供任何"钻石兑换金币"的通道</strong>（钻石只能买体力、道具、造型、抽奖，不能直接买金币）</td>
+    </tr>
+    <tr>
+      <td><strong>内容量不足</strong>——单机没有运营更新，内容消耗完就结束</td>
+      <td>中</td>
+      <td>10 条合成链 × 8 级 + 9 个区域 + 24 只角色 + 9 个节日活动，目标支撑 40+ 小时</td>
+    </tr>
+    <tr>
+      <td><strong>浏览器存档的脆弱性</strong>——Web 版存档依赖 IndexedDB，清理浏览器数据会丢失</td>
+      <td>中</td>
+      <td>引导玩家使用桌面端（存档在本地文件）作为长期游玩方式；Web 版定期导出备份</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout amber">
+  <span class="h">已随单机形态消失的风险</span>
+  <p><strong>支付与退款纠纷</strong>（无真实付费）、<strong>未成年充值保护</strong>（无充值）、<strong>抽奖概率合规</strong>（无付费抽取）、<strong>服务器运维成本</strong>（无后端）、<strong>版号审批</strong>（不公开发行则不需要）。这几项在联网版中都是高优先级风险，本版中全部归零。</p>
+</div>
+
+<h2><span class="num">16</span>下一步建议</h2>
+
+<ol>
+  <li><strong>先做 P0 原型验证手感</strong>——合成动画的"啪感"和拖拽手感是这类产品的成败关键，纸面方案无法评估，必须做出来测。</li>
+  <li><strong>优先实现存档系统</strong>——单机版的进度就是玩家全部资产，且要分享给朋友，存档安全应排在玩法之前实现，而不是最后补。</li>
+  <li><strong>尽早打通模拟充值链路</strong>——这是 v3.0 的核心模块，也是整个付费体验的基础，建议在 P1 阶段完成。</li>
+  <li><strong>确定美术风格并守住原创底线</strong>——建议走"低饱和治愈系 + 圆润造型"，先出 3 张角色概念图确认方向。同时明确：<strong>绝不使用原版任何素材</strong>。</li>
+  <li><strong>决定分发主渠道</strong>——推荐"在线链接 + 桌面 exe"双轨。如果需要在线链接，可以让我帮你把项目发布出去。</li>
+  <li><strong>补齐分享配套功能</strong>——乐园布局分享码、明信片导出、游玩数据统计，这三项能显著提升朋友之间的传播乐趣。</li>
+</ol>
+
+<footer>
+  《爪爪乐园》游戏设计方案 v3.0（内购破解版）· 基于对《肥鹅健身房》（疯狂游戏）的公开玩法拆解与市场数据整理<br>
+  本版保留原版完整付费体系与消费结构，仅将真实支付替换为模拟充值；已删除广告系统、拟联网包装层与开发者模式。<br>
+  文中数值均为设计建议值，需经原型验证后最终确定。方案不含任何原版美术资源，所有角色与视觉需原创设计。
+</footer>
+
+</div>
+</body>
+</html>
