@@ -157,8 +157,8 @@
 <table class="tight">
   <thead><tr><th>层级</th><th>子系统</th><th>核心作用</th></tr></thead>
   <tbody>
-    <tr><td rowspan="5">合成层</td><td>主棋盘</td><td>网格容器，初始格子有限，扩容消耗金币（约 1000 金币/格起）</td></tr>
-    <tr><td>发射器系统</td><td>点击型、自动型、手动型、冷却型四类</td></tr>
+    <tr><td rowspan="5">合成层</td><td>主棋盘</td><td>网格容器，<strong>整块可用、不做锁定格</strong>；格子类金币回收池全部落在背包上</td></tr>
+    <tr><td>发射器系统</td><td>点击型 / 自动型 / 手动型 / 冷却型四类。<strong>已实现：设施链（玩具架→玩具箱，主场景常驻、储备+冷却）+ 母体 + 链中段；未实现：自动型 / 手动型</strong></td></tr>
     <tr><td>合成链</td><td>每类物品 1–9 级，二合为一</td></tr>
     <tr><td>道具系统</td><td>剪刀（切割发射器降级）、充能器（释放储存产物）、加速、能量球</td></tr>
     <tr><td>体力系统</td><td>每 2 分钟恢复 1 点 + 12:00 / 18:00 / 24:00 三段补贴</td></tr>
@@ -247,15 +247,43 @@
   <thead><tr><th>参数</th><th>取值</th><th>说明</th></tr></thead>
   <tbody>
     <tr><td>棋盘尺寸</td><td>7 × 9 = 63 格</td><td>手机竖屏适配，单格约 48–52px</td></tr>
-    <tr><td>初始解锁</td><td>35 格（约 55%）</td><td>保留空间焦虑，驱动扩容消费</td></tr>
-    <tr><td>扩容成本</td><td>首格 800 金币，每格递增 15%</td><td>金币的主要回收池</td></tr>
+    <tr><td>初始可用</td><td><strong>整块 63 格全部可用</strong></td><td><strong>已修正（2026-10-02）</strong>：主场景不做"锁定格"，格子类金币回收池全部落在背包上</td></tr>
+    <tr><td>格子压力的来源</td><td>设施常驻占格 + 蛛网</td><td>设施（玩具架 / 玩具箱 / 合成出的母体）本身占棋盘格，且不可被蛛网吃掉</td></tr>
     <tr><td>合成规则</td><td>二合为一（2 个同级 → 1 个上级）</td><td>不做三合一，降低操作负担</td></tr>
     <tr><td>合成等级</td><td>Lv1 – Lv8（部分稀有链到 Lv9）</td><td>Lv8 需 128 个 Lv1，Lv9 需 256 个</td></tr>
   </tbody>
 </table>
 
+<div class="callout amber">
+  <span class="h">⚠️ 已修正：主场景不存在"锁定格"</span>
+  <p>本节原写"初始解锁 35 格、扩容 800 金币起"，实现时被判定为设计错误：<strong>正常游戏的主场景不会去解锁格子，那只是背包这类"额外存储"才有的成长线</strong>。现已改为：</p>
+  <p><strong>棋盘整块 63 格从开局起全部可用</strong>；"花金币解锁格子"只属于 <strong>背包</strong>（5×5=25 格，初始 10 格，首格 500 金币、每格 ×1.18）。</p>
+  <p>那"格子压力"从哪来？靠两件事，都不需要锁定格：<strong>① 设施在棋盘上常驻占格；② 蛛网会临时占格</strong>（且只落在空格上）。这与对标产品的实际形态一致 —— 它的主场景也没有锁定格，压力来自"东西太多放不下"。</p>
+</div>
+
 <h3>4.2 发射器设计</h3>
-<p>发射器按操作方式分四类，这是控制玩家节奏的核心杠杆——<strong>点击型给主动收益，自动型给被动收益，冷却型给"回来看看"的理由</strong>。</p>
+
+<div class="callout amber">
+  <span class="h">⚠️ 本节已按实现结果修正（2026-10-02 第二轮）——两条原设计是错的</span>
+  <p><strong>错误 ①「点一次冷却一次」。</strong>原实现把玩具架（4s）/ 玩具箱（10s）做成了"点一下就转圈"的按钮。<strong>正确模型是「储备 + 一次性冷却」</strong>：<code>buffer</code> 是储备上限（能连点几次），<code>refillMs</code> 是储备耗尽后的冷却时长。玩家应当能一口气把储备点完，再去干别的，而不是每次点击都等。</p>
+  <p><strong>错误 ②「发射器是棋盘外面的一条工具栏」。</strong>玩具架 / 玩具箱现在是<strong>主场景里的常驻对象</strong>（占棋盘格），可以被拖进背包暂存，也可以两两合成升级（2 个玩具架 → 1 个玩具箱）。它们在数据上就是一条独立的<strong>设施链 <code>fac</code></strong>，因此拖拽 / 背包 / 存档 / 渲染全部复用既有机制。</p>
+</div>
+
+<div class="callout purple">
+  <span class="h">★ 核心机制：储备耗尽之后的三种命运</span>
+  <p>「母体点完不一定就没了」—— 这是对标产品的关键玩法，现已落地为三种显式行为，并全部写进图鉴：</p>
+  <table class="tight">
+    <thead><tr><th>类型</th><th>规则</th><th>本项目实例</th></tr></thead>
+    <tbody>
+      <tr><td><strong>冷却型</strong></td><td><code>refillMs &gt; 0</code>：储备耗尽后进冷却，到点自动补满，<strong>主体永不消失</strong></td><td>玩具架（储备 8 / 冷却 60s）、玩具箱（储备 12 / 冷却 90s）、美容台（储备 8 / 冷却 120s）</td></tr>
+      <tr><td><strong>转化型</strong></td><td><code>refillMs = 0</code> + <code>exhaust.convert</code>：原地变成另一样东西，形成链与链之间的衔接</td><td>猫城堡 → 伴手礼（接入礼包链）；豪华礼盒 → 玩具架（白拿一个常驻设施）</td></tr>
+      <tr><td><strong>消失型</strong></td><td><code>refillMs = 0</code> 且无 exhaust：一次性物资包，用完就没了</td><td>铃铛球 / 洗澡球 / 鲜鱼排（都是链中段的 Lv3）</td></tr>
+    </tbody>
+  </table>
+  <p><strong>为什么这样分：</strong>冷却型负责"无尽产出"（稀缺的是体力与空间，不是基础物品）；转化型负责"链路衔接"（给玩家一个惊喜的下一步）；消失型只留给链中段，保住「甲·重置为满」那条取舍 —— <strong>如果所有发射器都永不消失，合成链的决策深度会塌掉。</strong></p>
+</div>
+
+<p>发射器按操作方式分四类，这是控制玩家节奏的核心杠杆——<strong>点击型给主动收益，自动型给被动收益，冷却型给"回来看看"的理由</strong>。<strong>当前实现进度：点击型 ✅ / 冷却型 ✅（设施链 + 美容台）/ 手动型 ✅（每日免费领 1 个玩具架）/ 自动型 ❌ 未做。</strong></p>
 
 <table>
   <thead><tr><th>类型</th><th>发射器</th><th>主产物</th><th>副产物</th><th>耐久 / 机制</th></tr></thead>
@@ -282,7 +310,7 @@
 
 <div class="callout purple">
   <span class="h">链的结构：终点只有两种，但发射器可以在中段</span>
-  <p><strong>终点只有两种：</strong>① <strong>母体</strong>——可点击产出下一条链，耐久耗尽即消失，本质是"一次性物资包"；② <strong>纯任务物品</strong>——只用于交付订单。<strong>两者都不可再合成。</strong></p>
+  <p><strong>终点只有两种：</strong>① <strong>母体</strong>——可点击产出下一条链，<strong>储备耗尽后按 4.2 的三种行为收尾（冷却续命 / 原地转化 / 消失）</strong>；② <strong>纯任务物品</strong>——只用于交付订单。<strong>两者都不可再合成。</strong></p>
   <p><strong>但发射器也可以出现在链的中段</strong>：既能点击产出，又能继续往上合。这正是「甲 · 重置为满」得以成立的前提。<strong>设计时必须刻意在每条链上留至少一个中段发射器</strong>，否则整条链的决策深度会塌掉。</p>
   <p><strong>中段发射器实例（礼包链，已落地 P0）：</strong></p>
   <div class="chain"><b>礼包链</b>　伴手礼 🎁（Lv1，8 次，产金币 15–40）→ 豪华礼盒 🎀（Lv2，18 次，产金币 40–110 / 8% 概率产钻石）</div>
@@ -291,6 +319,14 @@
 </div>
 
 <h3>4.3 合成链设计（猫派 5 条 + 狗派 5 条 + 共用 4 条）</h3>
+
+<div class="callout amber">
+  <span class="h">✔ 已实现：第三条链的深度与命名（2026-10-02 第三批「内容扩容」）</span>
+  <p>本节按 <strong>10 条合成链</strong>规划（猫派 5 + 狗派 5 + 共用 4）。目前实际落地的是 <strong>5 条</strong>：<strong>设施链</strong>（玩具架 → 玩具箱 → 玩具仓库，产出源头）、<strong>玩具链 / 护理链 / 食物链</strong>（各 7 个普通等级 + 1 个顶端 = Lv8）、<strong>礼包链</strong>（4 级，货币线）。</p>
+  <p><strong>命名取自本节下方各链的方案</strong>，只做了一处顺序适配：本节把母体（猫城堡 / 美容台）排在链的中间，而实现中<strong>母体必须是链的终点</strong>，所以它们被放到 Lv8。Lv1–3 与本节方案完全一致。</p>
+  <p><strong>每条链在 Lv3 与 Lv6 各留一个"中段发射器"</strong>（可点击、可继续合成）—— 这是「甲·重置为满」那条隐藏福利的载体：两次可选的"点剩最后一次再合成"。详见 <code>docs/内容扩容-第三批.md</code>。</p>
+  <p><strong>未实现的 5 条</strong>（训练链 / 医疗链 / 清洁链 / 货币链 / 舒适链）留待后续批次；设施链与礼包链是本节没有的新增内容。</p>
+</div>
 
 <p>这是猫狗主题最大的差异化落点。<strong>猫派与狗派各有一套独立合成链，产物不互通</strong>，但共用同一块棋盘。玩家可双线并行，也可专精一条。</p>
 
@@ -345,6 +381,13 @@
 </table>
 
 <p>基础奖励基准：<strong>15 经验 / 30 金币 / 40 好感度</strong>（沿用原版实测值），每提升 5 级整体上浮 20%。订单可主动放弃，但放弃后 10 分钟内不再刷新同类订单。</p>
+
+<div class="callout amber">
+  <span class="h">✔ 已解决：档位区间一度被链深压缩，第三批加深链路后已回到本节原样</span>
+  <p><strong>问题经过：</strong>本节的 Lv1–Lv8 假定合成链有 8 个普通等级，而实现时链只有 <strong>3 个普通等级 + 1 个顶端</strong>，于是档位区间被迫收敛成"普通 Lv1–2 / 进阶 Lv3 / 稀有 Lv4→Lv3 / 紧急 Lv4→Lv3"，结果 <strong>稀有与紧急落到同一个需求等级</strong>，两个档位只剩倒计时与倍率的差别，在"要交什么东西"上完全没有区分度。</p>
+  <p><strong>处理方式：</strong>不是改档位，而是<strong>把链加深</strong>（第三批「内容扩容」）—— 三条主链从 3 个普通等级扩到 <strong>7 个</strong>。现在档位区间回到本节原样：普通 Lv1–3 / 进阶 Lv4–5 / 稀有 Lv6–7，两两不重叠，只有紧急从 Lv7–8 收敛到 <strong>Lv7</strong>（因为 Lv8 是链的顶端，不参与交付）。详见 <code>docs/内容扩容-第三批.md</code>。</p>
+  <p><strong>这条经验值得记住：</strong>当"数值区间不够用"时，先看是不是<strong>内容深度</strong>的问题，而不是去改区间。</p>
+</div>
 
 <h3>5.2 顾客机制</h3>
 <ul>
@@ -1130,12 +1173,12 @@
   <tbody>
     <tr>
       <td><strong>P0 原型</strong></td><td>第 1–3 周</td>
-      <td>工程骨架 + <strong>竖屏布局</strong> + 棋盘 + 二合拖拽 + 2 个发射器 + 基础订单 + 1 条合成链 + 粒子特效层<br><span style="color:var(--green)">✔ 已完成（HTML 单文件原型，见 <code>prototype/paw-park-p0.html</code>）</span></td>
+      <td>工程骨架 + <strong>竖屏布局</strong> + 棋盘 + 二合拖拽 + 2 个发射器 + 基础订单 + 1 条合成链 + 粒子特效层<br><span style="color:var(--green)">✔ 已完成（已由 HTML 单文件原型升级为 Vue3 + TS + Pinia 工程，代码在 <code>src/</code>；原型文件已移除，见 git 历史）</span><br><span style="color:var(--green)">✔ 后续修正（2026-10-02 第二轮）：棋盘改为整块可用、发射器改为「设施链 + 储备/冷却 + 三种耗尽行为」、新增链路图鉴，详见 <code>docs/玩法修正-第二轮.md</code></span></td>
       <td>能完整跑通一次"合成 → 交付 → 拿奖励"闭环；<strong>真机触控手感可评估</strong>（必须在手机上测）</td>
     </tr>
     <tr>
       <td><strong>P1 核心</strong></td><td>第 4–7 周</td>
-      <td>体力 + 星星装饰 + 区域解锁 + 3 个区域 + 6 条合成链 + 商城 + 模拟充值 + 存档系统 + <strong>SyncAdapter 接口 + L1 存档导出 / 导入</strong></td>
+      <td>体力 + 星星装饰 + 区域解锁 + 3 个区域 + 6 条合成链 + 商城 + 模拟充值 + 存档系统 + <strong>SyncAdapter 接口 + L1 存档导出 / 导入</strong><br><span style="color:var(--green)">✔ 经营层已先行完成（2026-10-02）：<strong>9 个区域 + 11 件装饰 + 8 位顾客 + 常驻宠物 + 订单档位与倒计时</strong>，详见 <code>docs/经营层-第一批.md</code></span><br><span style="color:var(--ink-3)">○ 待做：商城 / 模拟充值 / 存档导出导入 / 合成链 3→6 级</span></td>
       <td>模拟充值全链路跑通；存档导出导入可用；SaveEnvelope 数据契约落地（含 schemaVersion / deviceId / checksum）</td>
     </tr>
     <tr>

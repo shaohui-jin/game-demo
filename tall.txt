@@ -1,0 +1,15 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.3 [39m[90mE:/jsh/game-demo[39m
+
+ [32m✓[39m src/stores/game.test.ts [2m([22m[2m86 tests[22m[2m)[22m[33m 10015[2mms[22m[39m
+   [32m✓[39m 棋盘渲染 [2m(3)[22m
+     [33m[2m✓[22m[39m 渲染 7×9 共 63 格，且**没有锁定格**（主场景整块可用）[33m 366[2mms[22m[39m
+   [32m✓[39m 自动型发射器（整机表现） [2m(2)[22m
+     [33m[2m✓[22m[39m 设施链出现自动型：图鉴里能看到，棋盘上带 ⟳ 标记[32m 300[2mms[22m[39m
+ [32m✓[39m src/game/logic.test.ts [2m([22m[2m99 tests[22m[2m)[22m[32m 123[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m185 passed[39m[22m[90m (185)[39m
+[2m   Start at [22m 18:30:27
+[2m   Duration [22m 17.44s[2m (tests 59%, environment 36%, import 2%, worker 2%)[22m
+

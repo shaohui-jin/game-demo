@@ -1,0 +1,73 @@
+# 《爪爪乐园》GitHub Pages 部署工作流（2026-10-02）
+#
+# 触发：push 到 master，或在仓库 Actions 页手动触发（workflow_dispatch）。
+# 产物：构建 dist/ 并发布到 GitHub Pages 项目页：
+#       https://<owner>.github.io/<repo>/
+#       当前即 https://shaohui-jin.github.io/game-demo/
+#
+# ★ 首次启用需要一次手动设置（只做一次）：
+#       仓库 Settings → Pages → Build and deployment → Source 选 **GitHub Actions**
+#   不选的话 deploy 步骤会报 "Pages not enabled"。
+#
+# base 路径：项目页部署在 /<repo>/ 子路径下，构建时注入 VITE_BASE
+#（见 vite.config.ts 的 base），本地构建不受影响。
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只保留最新一次部署；连续 push 时旧部署直接作废
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # 动态取仓库名：改名 / fork 均无需改动本文件
+      VITE_BASE: /${{ github.event.repository.name }}/
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 测试不过不部署（build 本身含 vue-tsc 类型检查）
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
