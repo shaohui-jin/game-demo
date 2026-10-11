@@ -1,0 +1,17 @@
+{
+  "name": "爪爪乐园",
+  "short_name": "爪爪乐园",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FBF9F6",
+  "theme_color": "#FBF9F6",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
