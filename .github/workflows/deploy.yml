@@ -22,6 +22,8 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # 第一次创建 Pages 站点要调 Create Pages API，只有 pages: write 会被拒
+  administration: write
 
 # 同一时间只保留最新一次部署；连续 push 时旧部署直接作废
 concurrency:
