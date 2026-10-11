@@ -14,6 +14,7 @@
  */
 
 import { CHAINS, CHAIN_DEPTH_V, CHAIN_ORDER } from './chains'
+import { festActive, freshLive, isBanned, weatherOn, type LiveState } from './content'
 import { START_FACILITIES } from './spawners'
 import {
   CUSTOMERS,
@@ -858,6 +859,12 @@ export interface OrderCtx {
   starBonus?: number
   /** 结算时刻，决定顾客阵营 */
   now?: number
+  /** 雨天：护理链订单金币翻倍 */
+  weather?: 'clear' | 'rain'
+  /** 节日或时间旅行期间，订单金币 +20% */
+  fest?: boolean
+  banKey?: string
+  banUntil?: number
 }
 
 /** 当前等级 + 区域进度下，可抽的档位 */
@@ -953,6 +960,7 @@ export function makeOrder(ctx: OrderCtx, rng: Rng = Math.random): Order {
     const range = tierLevelRange(k, tier)
     if (!range) return
     for (let lv = range.lo; lv <= range.hi; lv++) {
+      if (isBanned({ banKey: ctx.banKey ?? '', banUntil: ctx.banUntil ?? 0 } as LiveState, k, lv, now)) continue
       const w = Math.max(1, (range.hi + 1 - lv) * 2)
       for (let q = 0; q < w; q++) pool.push({ c: k, l: lv, ci })
     }
@@ -969,6 +977,8 @@ export function makeOrder(ctx: OrderCtx, rng: Rng = Math.random): Order {
   const customer = chosen ? chosen.key : pickCustomer(now, rng)
 
   const rw = orderRewards(tier, p.l, p.ci, ctx.level, goldMult, starBonus)
+  if (ctx.weather === 'rain' && p.c === 'care') rw.gold = Math.round(rw.gold * 2)
+  if (ctx.fest) rw.gold = Math.round(rw.gold * 1.2)
   return {
     id: Math.random().toString(36).slice(2, 9),
     chain: p.c,
@@ -1083,6 +1093,8 @@ export interface GameState {
   luckyPity: number
   /** 阶段性礼包限购计数：礼包 key → 已购次数（键不带时段，一次性的永远 1） */
   giftBought: Record<string, number>
+  /** 长线内容（阵营、图鉴、造型、乐园、节日、任务）。可缺省，读档时补齐 */
+  live: LiveState
 }
 
 export function freshState(rng: Rng = Math.random): GameState {
@@ -1097,7 +1109,7 @@ export function freshState(rng: Rng = Math.random): GameState {
     exp: 0,
     level: 1,
     // 设施链开局就可用（它就是产出源头）；礼包链由基础设施直接产出，也始终可用
-    unlocked: { fac: true, toy: true, care: false, food: false, supply: true },
+    unlocked: freshUnlocked(),
     orders: [],
     merges: 0,
     gensMade: 0,
@@ -1127,14 +1139,24 @@ export function freshState(rng: Rng = Math.random): GameState {
     fundClaimed: 0,
     luckyPity: 0,
     giftBought: {},
+    live: freshLive(),
   }
   s.orders = Array.from({ length: ORDER_SLOTS }, () => makeOrder(orderCtxOf(s), rng))
   return s
 }
 
 /** 从 state 现算一份抽订单所需的上下文（等级 / 区域 / 加成），避免各处重复拼参数 */
+function freshUnlocked(): Record<ChainKey, boolean> {
+  const u = {} as Record<ChainKey, boolean>
+  for (const k of Object.keys(CHAINS) as ChainKey[]) {
+    u[k] = k === 'fac' || k === 'toy' || k === 'supply'
+  }
+  return u
+}
+
 export function orderCtxOf(s: GameState, now: number = Date.now()): OrderCtx {
   const b = regionBonuses(s)
+  const live = s.live
   return {
     unlocked: s.unlocked,
     level: s.level,
@@ -1142,22 +1164,28 @@ export function orderCtxOf(s: GameState, now: number = Date.now()): OrderCtx {
     goldMult: b.goldMult,
     starBonus: b.starBonus,
     now,
+    weather: weatherOn(dayKey(now)),
+    fest: !!festActive(now, live?.festFocus ?? ''),
+    banKey: live?.banKey,
+    banUntil: live?.banUntil,
   }
 }
 
 /**
  * 开局给道具，让玩家第一次打开背包就看到"特殊道具"长什么样。
  *
- * 五种各给 1 个（升级卡给 2 张）：**道具如果不在开局露一次面，玩家不会知道它存在** ——
- * 而它们的正式来源（商城 / 抽奖）现在还没做，只能靠开局给。
- * 代价是初始背包用掉 5/10 格，这是刻意的：先让玩家知道有这些东西，再让他们决定买不买扩容。
+ * 每种道具各给 1 个（升级卡给 2 张），开局就能在背包里看到。
+ * 初始背包用掉 8/10 格。
  */
 export function seedBag(s: GameState): void {
   s.bag[0] = { k: 'tool', st: { tool: 'scissors', count: 1 } }
   s.bag[1] = { k: 'tool', st: { tool: 'upgradeCard', count: 2 } }
   s.bag[2] = { k: 'tool', st: { tool: 'charger', count: 1 } }
   s.bag[3] = { k: 'tool', st: { tool: 'hourglass', count: 1 } }
-  s.bag[4] = { k: 'tool', st: { tool: 'orb', count: 1 } }
+  s.bag[4] = { k: 'tool', st: { tool: 'orbGreen', count: 1 } }
+  s.bag[5] = { k: 'tool', st: { tool: 'orb', count: 1 } }
+  s.bag[6] = { k: 'tool', st: { tool: 'orbPurple', count: 1 } }
+  s.bag[7] = { k: 'tool', st: { tool: 'infinite', count: 1 } }
 }
 
 /**

@@ -128,6 +128,11 @@
   <p>⑬ <strong>P0 原型完成度</strong>——发射器掉落表与概率、发射器出现在链中段、甲规则、资源型掉落（金币 / 钻石直接进余额不占格子）、体力系统、旧存档迁移均已落地；配套 3 套自动化测试（纯逻辑 / 冒烟 / 存档），可一键回归。</p>
 </div>
 
+<div class="callout teal">
+  <span class="h">实现进度以 <code>docs/现状.md</code> 为准（2026-10-11）</span>
+  <p>本文是玩法规格。做了什么、没做什么、以及和本文不一致的实现口径，都写在 <code>现状.md</code>，不再在各章单独打勾。</p>
+</div>
+
 <h2><span class="num">01</span>对标拆解：《肥鹅健身房》靠什么跑起来</h2>
 
 <p>机制还原是设计前提。需要明确一点：<strong>这套玩法的成瘾性不来自"合成"本身，而来自合成层与经营层之间的强反馈闭环</strong>。合成只是产出手段，经营才是留存钩子。</p>
@@ -283,7 +288,7 @@
   <p><strong>为什么这样分：</strong>冷却型负责"无尽产出"（稀缺的是体力与空间，不是基础物品）；转化型负责"链路衔接"（给玩家一个惊喜的下一步）；消失型只留给链中段，保住「甲·重置为满」那条取舍 —— <strong>如果所有发射器都永不消失，合成链的决策深度会塌掉。</strong></p>
 </div>
 
-<p>发射器按操作方式分四类，这是控制玩家节奏的核心杠杆——<strong>点击型给主动收益，自动型给被动收益，冷却型给"回来看看"的理由</strong>。<strong>当前实现进度：点击型 ✅ / 冷却型 ✅（设施链 + 美容台）/ 手动型 ✅（每日免费领 1 个玩具架）/ 自动型 ❌ 未做。</strong></p>
+<p>发射器按操作方式分四类，这是控制玩家节奏的核心杠杆——<strong>点击型给主动收益，自动型给被动收益，冷却型给"回来看看"的理由</strong>。四类在代码里都已有对应物；棋盘上的具体设施和数值见 <code>docs/现状.md</code>。下表是对标原版的发射器规划，不是当前棋盘上的对象清单。</p>
 
 <table>
   <thead><tr><th>类型</th><th>发射器</th><th>主产物</th><th>副产物</th><th>耐久 / 机制</th></tr></thead>
@@ -322,9 +327,9 @@
 
 <div class="callout amber">
   <span class="h">✔ 已实现：第三条链的深度与命名（2026-10-02 第三批「内容扩容」）</span>
-  <p>本节按 <strong>10 条合成链</strong>规划（猫派 5 + 狗派 5 + 共用 4）。目前实际落地的是 <strong>5 条</strong>：<strong>设施链</strong>（玩具架 → 玩具箱 → 玩具仓库，产出源头）、<strong>玩具链 / 护理链 / 食物链</strong>（各 7 个普通等级 + 1 个顶端 = Lv8）、<strong>礼包链</strong>（4 级，货币线）。</p>
+  <p>本节按 <strong>10 条合成链</strong>规划（猫派 5 + 狗派 5 + 共用 4）。目前实际落地的是 <strong>5 条</strong>：<strong>设施链</strong>（5 级，产出源头）、<strong>玩具链 / 护理链 / 食物链</strong>（各 7 个普通等级 + 1 个顶端 = Lv8）、<strong>礼包链</strong>（4 级，货币线）。名单与数值见 <code>docs/现状.md</code>。</p>
   <p><strong>命名取自本节下方各链的方案</strong>，只做了一处顺序适配：本节把母体（猫城堡 / 美容台）排在链的中间，而实现中<strong>母体必须是链的终点</strong>，所以它们被放到 Lv8。Lv1–3 与本节方案完全一致。</p>
-  <p><strong>每条链在 Lv3 与 Lv6 各留一个"中段发射器"</strong>（可点击、可继续合成）—— 这是「甲·重置为满」那条隐藏福利的载体：两次可选的"点剩最后一次再合成"。详见 <code>docs/内容扩容-第三批.md</code>。</p>
+  <p><strong>每条链在 Lv3 与 Lv6 各留一个"中段发射器"</strong>（可点击、可继续合成）—— 这是「甲·重置为满」那条隐藏福利的载体：两次可选的"点剩最后一次再合成"。</p>
   <p><strong>未实现的 5 条</strong>（训练链 / 医疗链 / 清洁链 / 货币链 / 舒适链）留待后续批次；设施链与礼包链是本节没有的新增内容。</p>
 </div>
 
@@ -385,7 +390,7 @@
 <div class="callout amber">
   <span class="h">✔ 已解决：档位区间一度被链深压缩，第三批加深链路后已回到本节原样</span>
   <p><strong>问题经过：</strong>本节的 Lv1–Lv8 假定合成链有 8 个普通等级，而实现时链只有 <strong>3 个普通等级 + 1 个顶端</strong>，于是档位区间被迫收敛成"普通 Lv1–2 / 进阶 Lv3 / 稀有 Lv4→Lv3 / 紧急 Lv4→Lv3"，结果 <strong>稀有与紧急落到同一个需求等级</strong>，两个档位只剩倒计时与倍率的差别，在"要交什么东西"上完全没有区分度。</p>
-  <p><strong>处理方式：</strong>不是改档位，而是<strong>把链加深</strong>（第三批「内容扩容」）—— 三条主链从 3 个普通等级扩到 <strong>7 个</strong>。现在档位区间回到本节原样：普通 Lv1–3 / 进阶 Lv4–5 / 稀有 Lv6–7，两两不重叠，只有紧急从 Lv7–8 收敛到 <strong>Lv7</strong>（因为 Lv8 是链的顶端，不参与交付）。详见 <code>docs/内容扩容-第三批.md</code>。</p>
+  <p><strong>处理方式：</strong>不是改档位，而是<strong>把链加深</strong>—— 三条主链从 3 个普通等级扩到 <strong>7 个</strong>。现在档位区间回到本节原样：普通 Lv1–3 / 进阶 Lv4–5 / 稀有 Lv6–7，两两不重叠，只有紧急从 Lv7–8 收敛到 <strong>Lv7</strong>（因为 Lv8 是链的顶端，不参与交付）。</p>
   <p><strong>这条经验值得记住：</strong>当"数值区间不够用"时，先看是不是<strong>内容深度</strong>的问题，而不是去改区间。</p>
 </div>
 
@@ -1173,12 +1178,12 @@
   <tbody>
     <tr>
       <td><strong>P0 原型</strong></td><td>第 1–3 周</td>
-      <td>工程骨架 + <strong>竖屏布局</strong> + 棋盘 + 二合拖拽 + 2 个发射器 + 基础订单 + 1 条合成链 + 粒子特效层<br><span style="color:var(--green)">✔ 已完成（已由 HTML 单文件原型升级为 Vue3 + TS + Pinia 工程，代码在 <code>src/</code>；原型文件已移除，见 git 历史）</span><br><span style="color:var(--green)">✔ 后续修正（2026-10-02 第二轮）：棋盘改为整块可用、发射器改为「设施链 + 储备/冷却 + 三种耗尽行为」、新增链路图鉴，详见 <code>docs/玩法修正-第二轮.md</code></span></td>
+      <td>工程骨架 + <strong>竖屏布局</strong> + 棋盘 + 二合拖拽 + 2 个发射器 + 基础订单 + 1 条合成链 + 粒子特效层<br><span style="color:var(--ink-3)">完成情况见 <code>docs/现状.md</code>。本章只保留阶段划分，不再作为工期或进度勾选。</span></td>
       <td>能完整跑通一次"合成 → 交付 → 拿奖励"闭环；<strong>真机触控手感可评估</strong>（必须在手机上测）</td>
     </tr>
     <tr>
       <td><strong>P1 核心</strong></td><td>第 4–7 周</td>
-      <td>体力 + 星星装饰 + 区域解锁 + 3 个区域 + 6 条合成链 + 商城 + 模拟充值 + 存档系统 + <strong>SyncAdapter 接口 + L1 存档导出 / 导入</strong><br><span style="color:var(--green)">✔ 经营层已先行完成（2026-10-02）：<strong>9 个区域 + 11 件装饰 + 8 位顾客 + 常驻宠物 + 订单档位与倒计时</strong>，详见 <code>docs/经营层-第一批.md</code></span><br><span style="color:var(--ink-3)">○ 待做：商城 / 模拟充值 / 存档导出导入 / 合成链 3→6 级</span></td>
+      <td>体力 + 星星装饰 + 区域解锁 + 3 个区域 + 6 条合成链 + 商城 + 模拟充值 + 存档系统 + <strong>SyncAdapter 接口 + L1 存档导出 / 导入</strong><br><span style="color:var(--ink-3)">完成情况见 <code>docs/现状.md</code>。</span></td>
       <td>模拟充值全链路跑通；存档导出导入可用；SaveEnvelope 数据契约落地（含 schemaVersion / deviceId / checksum）</td>
     </tr>
     <tr>

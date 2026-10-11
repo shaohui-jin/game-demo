@@ -10,7 +10,7 @@
 
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
-import { CHAINS } from '../game/chains'
+import { CHAINS, TREE_ORDER } from '../game/chains'
 import {
   CUSTOMERS,
   DECORS,
@@ -26,7 +26,15 @@ import {
   BAG_TOTAL,
   CLICK_COST,
   DAILY_FAC_LEVEL,
+  INFINITE_MS,
+  LUCKY_DECOR_TO_GEM,
+  LUCKY_SKIN_TO_GEM,
+  ORB_GREEN,
+  ORB_PURPLE,
   ORB_STAMINA,
+  QUEST_DELIVER,
+  QUEST_MERGE,
+  QUEST_PRODUCE,
   PET_ACCUM_MAX_HOURS,
   SHAKE_AMP,
   STAMINA_MAX,
@@ -133,6 +141,26 @@ import type {
   ToolKey,
 } from '../game/types'
 import { useFx, type Rect } from '../composables/useFx'
+import { playMerge } from '../fx/sound'
+import { nextPlot, plotDef, skinOf, type ThemeId } from '../game/yard'
+import {
+  FESTS,
+  actsUnlocked,
+  cardId,
+  decodeLayout,
+  encodeLayout,
+  festActive,
+  grantSkin,
+  liftPlacement,
+  noteSeen,
+  placeDecor,
+  readyBonds,
+  rollQuestDay,
+  rotatePlacement,
+  setBan,
+  storyLines,
+  weatherOn,
+} from '../game/content'
 
 export const useGameStore = defineStore('game', () => {
   const fx = useFx()
@@ -316,6 +344,16 @@ export const useGameStore = defineStore('game', () => {
     if (g.value) save(g.value)
   }
 
+  function touchQuest(kind: 'merge' | 'deliver' | 'produce'): void {
+    if (!g.value?.live) return
+    rollQuestDay(g.value.live, dayKey(now.value))
+    if (kind === 'merge') g.value.live.questMerge++
+    else if (kind === 'deliver') {
+      g.value.live.questDeliver++
+      g.value.live.delivers++
+    } else g.value.live.questProduce++
+  }
+
   function flag(set: Set<number>, i: number, ms: number): void {
     set.add(i)
     setTimeout(() => set.delete(i), ms)
@@ -466,6 +504,29 @@ export const useGameStore = defineStore('game', () => {
       // 背包满时不写 cardDay —— 等玩家腾出位置再发，不吞这份收益
     }
 
+    if (g.value.live) {
+      g.value.live.playMs += 1000
+      rollQuestDay(g.value.live, dayKey(nowMs))
+      const day = dayKey(nowMs)
+      if (weatherOn(day) === 'rain' && g.value.live.weatherTold !== day) {
+        g.value.live.weatherTold = day
+        fx.toast('下雨了：今天的护理订单金币翻倍')
+        dirty = true
+      }
+      const bonds = readyBonds(g.value.live, g.value.pets)
+      if (bonds.length && g.value.live.bondDay !== day) {
+        g.value.live.bondDay = day
+        for (const b of bonds) {
+          const t = pickRandomEmpty(g.value.board, g.value.web, Math.random, g.value.bagAt)
+          if (t < 0) break
+          g.value.board[t] = makeItem(b.chain, b.level)
+          noteSeen(g.value.live, b.chain, b.level)
+        }
+        fx.toast(`羁绊触发：${bonds.map((b) => b.name).join('、')}`)
+        dirty = true
+      }
+    }
+
     return dirty
   }
 
@@ -614,7 +675,8 @@ export const useGameStore = defineStore('game', () => {
       else fx.toast(`${d.name} 储备已耗尽`)
       return
     }
-    if (g.value.stamina < CLICK_COST) {
+    const freeClick = (g.value.live?.infiniteUntil ?? 0) > Date.now()
+    if (!freeClick && g.value.stamina < CLICK_COST) {
       fx.toast('体力不足 · 每 2 分钟恢复 1 点')
       return
     }
@@ -631,8 +693,9 @@ export const useGameStore = defineStore('game', () => {
     const cc = cellCenter(cellIdx)
     const srcRect = fx.getCellRect(cellIdx)
 
-    g.value.stamina -= CLICK_COST
+    if (!freeClick) g.value.stamina -= CLICK_COST
     it.charges--
+    touchQuest('produce')
 
     if (drop.type === 'gold' || drop.type === 'gem') {
       // 资源掉落：加余额 + 飘字 + 轻微粒子，不进棋盘
@@ -693,14 +756,15 @@ export const useGameStore = defineStore('game', () => {
       fx.haptic(9)
     }
 
-    countProduce()
+    countProduce(drop.type === 'item' ? { chain: drop.chain, level: drop.level } : undefined)
     persist()
   }
 
   // ==================== 蛛网 ====================
   /** 每次产出后累计计数，到阈值就落一张蛛网（前期节奏阀） */
-  function countProduce(): void {
+  function countProduce(dropped?: { chain: ChainKey; level: number }): void {
     if (!g.value) return
+    if (dropped) noteSeen(g.value.live, dropped.chain, dropped.level)
     g.value.produces++
     if (g.value.produces % WEB_EVERY !== 0) return
     if (addWeb()) fx.toast('棋盘上出现了蛛网 —— 轻点花金币清除，或拖一个物品上去牺牲它')
@@ -811,6 +875,9 @@ export const useGameStore = defineStore('game', () => {
     const newIt = makeItem(k, nextLv)
     g.value.board[to] = newIt
     g.value.merges++
+    touchQuest('merge')
+    noteSeen(g.value.live, k, nextLv)
+    if (g.value.live.sound) playMerge()
 
     // 走到链的终点（母体 / 纯任务物品 / 无顶端的最高级）才算里程碑
     const isMilestone = nextLv >= maxLv(k)
@@ -944,7 +1011,18 @@ export const useGameStore = defineStore('game', () => {
       } else {
         g.value.affinity[o.customer] = next
       }
+      const after = g.value.affinity[o.customer] ?? 0
+      const prevActs = actsUnlocked(Math.max(0, after - o.affinity))
+      const nowActs = actsUnlocked(after)
+      if (nowActs > prevActs && cust) {
+        fx.toast(`${cust.emoji} ${storyLines(o.customer)[nowActs - 1]}`)
+      }
+      if (nowActs >= 2 && !g.value.live.cards.includes(cardId(o.customer))) {
+        g.value.live.cards.push(cardId(o.customer))
+        fx.toast(`获得故事卡 · ${cust?.name ?? '顾客'}`)
+      }
     }
+    touchQuest('deliver')
 
     fx.burst(c.x, c.y, '#BA7517', 20, 1.1)
     fx.ring(c.x, c.y, '#BA7517', 44, 3)
@@ -1214,14 +1292,25 @@ export const useGameStore = defineStore('game', () => {
       return true
     }
 
-    if (tool === 'orb') {
-      g.value.stamina += ORB_STAMINA
+    const orbAmt = tool === 'orb' ? ORB_STAMINA : tool === 'orbGreen' ? ORB_GREEN : tool === 'orbPurple' ? ORB_PURPLE : 0
+    if (orbAmt > 0) {
+      g.value.stamina += orbAmt
       consumeTool(tool)
-      fx.floatText(cx, cy, `+${ORB_STAMINA} ⚡`, '#7F77DD')
+      fx.floatText(cx, cy, `+${orbAmt} ⚡`, '#7F77DD')
       fx.burst(cx, cy, '#7F77DD', 18, 1.15)
       fx.ring(cx, cy, '#7F77DD', 54, 3.2)
       fx.haptic(22)
-      fx.toast(`能量球：体力 +${ORB_STAMINA}（可超过上限）`)
+      fx.toast(`${d.name}：体力 +${orbAmt}（可超过上限）`)
+      persist()
+      return true
+    }
+
+    if (tool === 'infinite') {
+      g.value.live.infiniteUntil = Date.now() + INFINITE_MS
+      consumeTool(tool)
+      fx.floatText(cx, cy, '5 分钟无限体力', '#E6B422')
+      fx.haptic(22)
+      fx.toast('无限能量生效：5 分钟内点击不消耗体力')
       persist()
       return true
     }
@@ -1847,7 +1936,22 @@ export const useGameStore = defineStore('game', () => {
     for (const p of out) {
       if (p.kind === 'gold') g.value.gold += p.amount
       else if (p.kind === 'tool' && p.tool) addToolToBag(p.tool, p.amount)
-      else g.value.gem += p.amount // 造型 / 装饰：当前视为重复 → 折成钻石
+      else if (p.kind === 'skin' && p.skinKey) {
+        const got = grantSkin(g.value.live, p.skinKey)
+        if (got !== 'new') {
+          g.value.gem += LUCKY_SKIN_TO_GEM
+          p.converted = true
+          p.amount = LUCKY_SKIN_TO_GEM
+        }
+      } else if (p.kind === 'decor' && p.decorKey) {
+        if (decorLevel(g.value, p.decorKey) > 0) {
+          g.value.gem += LUCKY_DECOR_TO_GEM
+          p.converted = true
+          p.amount = LUCKY_DECOR_TO_GEM
+        } else {
+          g.value.decor[p.decorKey] = 1
+        }
+      }
     }
     luckyHistory.value = out
     persist()
@@ -2022,8 +2126,358 @@ export const useGameStore = defineStore('game', () => {
     fx.toast(n ? `${n} 个冷却型对象的储备已抽干，等它们自动补满` : '棋盘上没有冷却型对象')
   }
 
+  /** 打开游戏先进乐园，棋盘是从乐园进去的另一个场景 */
+  const scene = ref<'yard' | 'board'>('yard')
+  const parkOpen = ref(false)
+  const orderOpen = ref(false)
+  const parkTab = ref<'codex' | 'story' | 'park' | 'fest' | 'skin' | 'card'>('codex')
+
+  const needsBackupPrompt = computed(() => !!g.value && !g.value.live.backupPrompted)
+
+  function enterBoard(): void {
+    scene.value = 'board'
+  }
+
+  function leaveBoard(): void {
+    scene.value = 'yard'
+    bagOpen.value = false
+    shopOpen.value = false
+    orderOpen.value = false
+    businessOpen.value = false
+    rechargeOpen.value = false
+    treeOpen.value = false
+  }
+
+  function setTheme(theme: ThemeId): void {
+    if (!g.value) return
+    g.value.live.theme = theme
+    persist()
+    fx.toast(theme === 'dog' ? '已换成狗的样子' : '已换成猫的样子')
+  }
+
+  function buyPlot(id: string): boolean {
+    if (!g.value) return false
+    const plot = plotDef(id)
+    if (!plot) return false
+    const lv = g.value.live.plotLv
+    if ((lv[id] ?? 0) >= 1) {
+      fx.toast('这块地已经盖好了')
+      return false
+    }
+    if (nextPlot(lv)?.id !== id) {
+      fx.toast('先把前面的地买下来')
+      return false
+    }
+    if (g.value.stars < plot.cost) {
+      fx.toast(`星星不够，还要 ${plot.cost} ⭐`)
+      return false
+    }
+    g.value.stars -= plot.cost
+    lv[id] = 1
+    const skin = skinOf(plot.building, g.value.live.theme)
+    if (plot.chain) unlockChain(plot.chain)
+    persist()
+    fx.toast(plot.chain ? `${skin.name} 盖好了，对应的链已经打开` : `${skin.name} 盖好了`)
+    return true
+  }
+
+  function upgradePlot(id: string): boolean {
+    if (!g.value) return false
+    const plot = plotDef(id)
+    if (!plot) return false
+    const lv = g.value.live.plotLv[id] ?? 0
+    if (lv < 1) {
+      fx.toast('还没盖')
+      return false
+    }
+    if (lv >= 2) {
+      fx.toast('已经升过了')
+      return false
+    }
+    if (g.value.stars < plot.upCost) {
+      fx.toast(`星星不够，升级要 ${plot.upCost} ⭐`)
+      return false
+    }
+    g.value.stars -= plot.upCost
+    g.value.live.plotLv[id] = 2
+    persist()
+    fx.toast(`${skinOf(plot.building, g.value.live.theme).name} 升到 2 级`)
+    return true
+  }
+
+  function chooseCamp(camp: 'cat' | 'dog'): void {
+    if (!g.value) return
+    g.value.live.camp = camp
+    persist()
+    fx.toast(camp === 'cat' ? '你是猫派店长。护理客人会更对味。' : '你是狗派店长。训练客人会更对味。')
+  }
+
+  function ackBackup(): void {
+    if (!g.value) return
+    backupNow(g.value)
+    g.value.live.backupPrompted = true
+    g.value.bakDay = dayKey(Date.now())
+    persist()
+    fx.toast('已备份一份。以后也可以在存档里导出。')
+  }
+
+  function skipBackup(): void {
+    if (!g.value) return
+    g.value.live.backupPrompted = true
+    persist()
+  }
+
+  function openPark(tab: typeof parkTab.value = 'codex'): void {
+    parkTab.value = tab
+    parkOpen.value = true
+  }
+  function closePark(): void {
+    parkOpen.value = false
+  }
+
+  function abandonOrder(orderId: string): boolean {
+    if (!g.value) return false
+    const idx = g.value.orders.findIndex((o) => o.id === orderId)
+    if (idx < 0) return false
+    const o = g.value.orders[idx]
+    setBan(g.value.live, o.chain, o.level, Date.now())
+    g.value.orders[idx] = makeOrder(orderCtxOf(g.value))
+    persist()
+    fx.toast('订单已放弃。同样的需求 10 分钟内不会再出现。')
+    return true
+  }
+
+  function claimQuest(): boolean {
+    if (!g.value) return false
+    const L = g.value.live
+    rollQuestDay(L, dayKey(now.value))
+    if (L.questClaimed) {
+      fx.toast('今天的任务奖励已经领过了')
+      return false
+    }
+    if (L.questMerge < QUEST_MERGE || L.questDeliver < QUEST_DELIVER || L.questProduce < QUEST_PRODUCE) {
+      fx.toast(`还差一点点：合成 ${L.questMerge}/${QUEST_MERGE}，交付 ${L.questDeliver}/${QUEST_DELIVER}，点击 ${L.questProduce}/${QUEST_PRODUCE}`)
+      return false
+    }
+    L.questClaimed = true
+    g.value.gold += 80
+    addToolToBag('orbGreen', 1)
+    persist()
+    fx.toast('每日任务完成：80 金币，绿能量球已放进背包')
+    return true
+  }
+
+  function checkIn(): boolean {
+    if (!g.value) return false
+    const L = g.value.live
+    const day = dayKey(now.value)
+    if (L.checkinDay === day) {
+      fx.toast('今天已经签过到了')
+      return false
+    }
+    const yesterday = dayKey(now.value - 24 * 60 * 60 * 1000)
+    L.streak = L.checkinDay === yesterday ? L.streak + 1 : 1
+    L.checkinDay = day
+    const gem = Math.min(20, 4 + L.streak * 2)
+    g.value.gem += gem
+    persist()
+    fx.toast(`签到第 ${L.streak} 天，获得 ${gem} 钻石`)
+    return true
+  }
+
+  function focusFest(key: string): void {
+    if (!g.value) return
+    g.value.live.festFocus = key
+    g.value.orders = g.value.orders.map(() => makeOrder(orderCtxOf(g.value!)))
+    persist()
+    const f = FESTS.find((x) => x.key === key)
+    fx.toast(f ? `时间旅行：现在是${f.name}。订单金币提高了。` : '回到今天的日期')
+  }
+
+  function claimFest(): boolean {
+    if (!g.value) return false
+    const f = festActive(now.value, g.value.live.festFocus)
+    if (!f) {
+      fx.toast('现在没有节日')
+      return false
+    }
+    const mark = `${dayKey(now.value)}@${f.key}`
+    if (g.value.live.festClaim === mark) {
+      fx.toast('这份节日礼物今天领过了')
+      return false
+    }
+    g.value.live.festClaim = mark
+    addToolToBag('orb', 1)
+    persist()
+    fx.toast(`${f.emoji} ${f.name}礼物：能量球 ×1`)
+    return true
+  }
+
+  function assignPet(pet: string, region: RegionKey): void {
+    if (!g.value || !g.value.pets.includes(pet)) {
+      fx.toast('先把这只顾客养成常驻宠物')
+      return
+    }
+    if (!isRegionUnlocked(g.value, region)) {
+      fx.toast('这个区域还没解锁')
+      return
+    }
+    g.value.live.post[pet] = region
+    persist()
+    fx.toast(`${customerDef(pet)?.name ?? '宠物'} 去了 ${regionDef(region)?.name ?? '区域'}`)
+  }
+
+  function dispatchPet(pet: string): boolean {
+    if (!g.value || !g.value.pets.includes(pet)) {
+      fx.toast('只有常驻宠物能代打')
+      return false
+    }
+    let cell = -1
+    for (let i = 0; i < TOTAL; i++) {
+      const it = g.value.board[i]
+      if (!it) continue
+      const d = defOf(it.chain, it.level)
+      if (isClickable(d) && (it.charges ?? 0) > 0) {
+        cell = i
+        break
+      }
+    }
+    if (cell < 0) {
+      fx.toast('棋盘上没有还能点的设施')
+      return false
+    }
+    const it = g.value.board[cell]!
+    const d = defOf(it.chain, it.level)!
+    let n = 0
+    const times = Math.min(5, it.charges ?? 0)
+    for (let k = 0; k < times; k++) {
+      const drop = rollDrops(d.drops ?? [])
+      if (drop.type === 'item') {
+        const t = pickRandomEmpty(g.value.board, g.value.web, Math.random, g.value.bagAt)
+        if (t < 0) break
+        g.value.board[t] = makeItem(drop.chain, drop.level)
+        noteSeen(g.value.live, drop.chain, drop.level)
+      } else {
+        const amount = rollRange(drop.min, drop.max)
+        if (drop.type === 'gold') g.value.gold += amount
+        else g.value.gem += amount
+      }
+      it.charges = (it.charges ?? 1) - 1
+      n++
+    }
+    persist()
+    fx.toast(`${customerDef(pet)?.name ?? '宠物'} 帮忙点了 ${n} 次，不消耗你的体力`)
+    return n > 0
+  }
+
+  function putDecor(decor: DecorKey, x: number, y: number): boolean {
+    if (!g.value) return false
+    if (decorLevel(g.value, decor) <= 0) {
+      fx.toast('先用星星买下这件装饰')
+      return false
+    }
+    if (!placeDecor(g.value.live, decor, x, y)) {
+      fx.toast('这个位置已经有东西，或者这件装饰已经摆过了')
+      return false
+    }
+    persist()
+    return true
+  }
+
+  function turnDecor(decor: string): void {
+    if (!g.value) return
+    if (rotatePlacement(g.value.live, decor)) persist()
+  }
+
+  function removeDecor(decor: string): void {
+    if (!g.value) return
+    if (liftPlacement(g.value.live, decor)) persist()
+  }
+
+  function useScheme(i: number): void {
+    if (!g.value) return
+    g.value.live.schemeIx = Math.min(2, Math.max(0, i))
+    persist()
+  }
+
+  function shareCode(): string {
+    return g.value ? encodeLayout(g.value.live) : ''
+  }
+
+  function importShare(text: string): boolean {
+    if (!g.value) return false
+    const pack = decodeLayout(text)
+    if (!pack) {
+      fx.toast('这不是乐园分享码')
+      return false
+    }
+    g.value.live.schemes = pack.schemes
+    g.value.live.schemeNames = pack.schemeNames.length === 3 ? pack.schemeNames : g.value.live.schemeNames
+    g.value.live.schemeIx = pack.schemeIx
+    g.value.live.post = pack.post
+    persist()
+    fx.toast('乐园布局已导入')
+    return true
+  }
+
+  function toggleSound(): void {
+    if (!g.value) return
+    g.value.live.sound = !g.value.live.sound
+    persist()
+    fx.toast(g.value.live.sound ? '音效已打开' : '音效已关闭')
+  }
+
+  function markPostcard(): void {
+    if (!g.value) return
+    if (!isRegionUnlocked(g.value, 'studio')) {
+      fx.toast('解锁摄影棚之后才能导出明信片')
+      return
+    }
+    g.value.live.postcards++
+    persist()
+  }
+
+  function equipSkin(customer: string, skin: string): void {
+    if (!g.value) return
+    if (!g.value.live.skins.includes(skin)) {
+      fx.toast('还没有这件造型')
+      return
+    }
+    g.value.live.equipped[customer] = skin
+    persist()
+  }
+
+  const codex = computed(() => {
+    let itemTotal = 0
+    let items = 0
+    const seen = new Set(g.value?.live.seen ?? [])
+    for (const k of TREE_ORDER) {
+      const n = maxLv(k)
+      itemTotal += n
+      for (let lv = 1; lv <= n; lv++) if (seen.has(`${k}:${lv}`)) items++
+    }
+    const decorGot = DECORS.filter((d) => (g.value ? decorLevel(g.value, d.key) > 0 : false)).length
+    const custGot = CUSTOMERS.filter(
+      (c) => !!g.value && ((g.value.affinity[c.key] ?? 0) > 0 || g.value.pets.includes(c.key))
+    ).length
+    return {
+      items,
+      itemTotal,
+      decorGot,
+      decorTotal: DECORS.length,
+      custGot,
+      custTotal: CUSTOMERS.length,
+    }
+  })
+
+  const todayWeather = computed(() => weatherOn(dayKey(now.value)))
+  const todayFest = computed(() => festActive(now.value, g.value?.live.festFocus ?? ''))
+
   function showOrders(): void {
-    fx.toast(`当前 ${readyOrders.value}/${orders.value.length} 个订单可交付`)
+    orderOpen.value = true
+  }
+  function closeOrders(): void {
+    orderOpen.value = false
   }
 
   function showHintFor(i: number): void {
@@ -2063,6 +2517,14 @@ export const useGameStore = defineStore('game', () => {
     hintHTML,
     treeOpen,
     bagOpen,
+    scene,
+    parkOpen,
+    parkTab,
+    orderOpen,
+    needsBackupPrompt,
+    codex,
+    todayWeather,
+    todayFest,
     selectedBoard,
     pendingTool,
     businessOpen,
@@ -2178,6 +2640,33 @@ export const useGameStore = defineStore('game', () => {
     debugGive,
     debugDrain,
     showOrders,
+    closeOrders,
+    enterBoard,
+    leaveBoard,
+    setTheme,
+    buyPlot,
+    upgradePlot,
+    chooseCamp,
+    ackBackup,
+    skipBackup,
+    openPark,
+    closePark,
+    abandonOrder,
+    claimQuest,
+    checkIn,
+    focusFest,
+    claimFest,
+    assignPet,
+    dispatchPet,
+    putDecor,
+    turnDecor,
+    removeDecor,
+    useScheme,
+    shareCode,
+    importShare,
+    toggleSound,
+    markPostcard,
+    equipSkin,
     showHintFor,
     setHint,
     openTree,

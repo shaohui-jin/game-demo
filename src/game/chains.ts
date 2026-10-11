@@ -30,7 +30,7 @@ import type { Chain, ChainKey } from './types'
  * ★ 链深度（2026-10-02 第三批「内容扩容」）：
  *     toy / care / food = **7 个普通等级 + 1 顶端 = Lv8**
  *     supply            = **4 级**（无顶端）
- *     fac               = **3 级**（无顶端）
+ *     fac               = **5 级**（无顶端：前 3 级点击型，后 2 级自动型）
  *   加深链路不只是"多几个名字"——它同时修掉两个结构问题：
  *     ① 订单档位重新有区分度（稀疏/紧急不再都退化成同一个等级）；
  *     ② "优先发育哪条链"这个取舍才真正存在。
@@ -40,6 +40,68 @@ import type { Chain, ChainKey } from './types'
  * ★ 视觉：`sprite` 是贴图资源键（对应 src/ui/sprites.ts），`emoji` 保留为兜底。
  *   新加的等级也已经配好贴图（`toy-4` … `toy-7`），避免同一块棋盘上出现"贴图 + emoji"混排。
  */
+
+interface Step {
+  name: string
+  emoji: string
+}
+
+/** 7 个普通等级 + 1 个纯任务顶端。Lv3 / Lv6 是消失型中段发射器。 */
+function orderChain(p: {
+  key: ChainKey
+  name: string
+  sprite: string
+  bg: string
+  fg: string
+  fx: string
+  steps: Step[]
+  gold?: boolean
+}): Chain {
+  const items: Chain['items'] = p.steps.slice(0, 7).map((s, i) => {
+    const lv = i + 1
+    const base = {
+      name: s.name,
+      emoji: s.emoji,
+      sprite: `${p.sprite}-${lv}`,
+      bg: p.bg,
+      fg: p.fg,
+      fx: p.fx,
+    }
+    if (lv !== 3 && lv !== 6) return base
+    return {
+      ...base,
+      click: {
+        buffer: lv === 3 ? 5 : 6,
+        refillMs: 0,
+        drops: p.gold
+          ? [
+              { type: 'gold' as const, min: lv === 3 ? 20 : 50, max: lv === 3 ? 40 : 90, w: 70 },
+              { type: 'item' as const, chain: p.key, level: Math.max(1, lv - 2), w: 30 },
+            ]
+          : [
+              { type: 'item' as const, chain: p.key, level: Math.max(1, lv - 2), w: 70 },
+              { type: 'item' as const, chain: p.key, level: Math.max(1, lv - 1), w: 30 },
+            ],
+      },
+    }
+  })
+  const top = p.steps[7]
+  return {
+    key: p.key,
+    name: p.name,
+    items,
+    top: {
+      kind: 'final',
+      name: top.name,
+      emoji: top.emoji,
+      sprite: `${p.sprite}-8`,
+      bg: p.bg,
+      fg: p.fg,
+      fx: p.fx,
+    },
+  }
+}
+
 export const CHAINS: Record<ChainKey, Chain> = {
   /**
    * 设施链：**产出源头**，三级递进。
@@ -411,13 +473,105 @@ export const CHAINS: Record<ChainKey, Chain> = {
     ],
     top: null,
   },
+
+  comfort: orderChain({
+    key: 'comfort',
+    name: '舒适链',
+    sprite: 'comfort',
+    bg: '#F3E4FF',
+    fg: '#3C1361',
+    fx: '#9A6BC9',
+    steps: [
+      { name: '猫垫', emoji: '🟫' },
+      { name: '猫窝', emoji: '🛏️' },
+      { name: '猫吊床', emoji: '🪺' },
+      { name: '猫沙发', emoji: '🛋️' },
+      { name: '猫跳台', emoji: '🪜' },
+      { name: '猫塔', emoji: '🗼' },
+      { name: '猫别墅', emoji: '🏡' },
+      { name: '猫宫殿', emoji: '🏯' },
+    ],
+  }),
+  train: orderChain({
+    key: 'train',
+    name: '训练链',
+    sprite: 'train',
+    bg: '#FFE7C2',
+    fg: '#4A2A06',
+    fx: '#E09A3C',
+    steps: [
+      { name: '口令卡', emoji: '🃏' },
+      { name: '牵引绳', emoji: '🦮' },
+      { name: '训练垫', emoji: '🟨' },
+      { name: '障碍杆', emoji: '🚧' },
+      { name: '敏捷赛道', emoji: '🐕' },
+      { name: '服从赛', emoji: '🏁' },
+      { name: '冠军奖杯', emoji: '🏆' },
+      { name: '狗界传奇', emoji: '👑' },
+    ],
+  }),
+  med: orderChain({
+    key: 'med',
+    name: '医疗链',
+    sprite: 'med',
+    bg: '#DDF6F3',
+    fg: '#04342C',
+    fx: '#1F9D8A',
+    steps: [
+      { name: '驱虫药', emoji: '💊' },
+      { name: '疫苗', emoji: '💉' },
+      { name: '营养膏', emoji: '🧴' },
+      { name: '化毛膏', emoji: '🧪' },
+      { name: '体检仪', emoji: '🩺' },
+      { name: '猫诊所', emoji: '🏥' },
+      { name: '猫医院', emoji: '🏨' },
+      { name: '猫医疗中心', emoji: '⚕️' },
+    ],
+  }),
+  clean: orderChain({
+    key: 'clean',
+    name: '清洁链',
+    sprite: 'clean',
+    bg: '#E4F2FF',
+    fg: '#0C447A',
+    fx: '#4A90D9',
+    steps: [
+      { name: '毛发', emoji: '🪶' },
+      { name: '毛团', emoji: '🫧' },
+      { name: '垃圾袋', emoji: '🗑️' },
+      { name: '吸尘器', emoji: '🧹' },
+      { name: '清洁车', emoji: '🚛' },
+      { name: '洗地机', emoji: '🧽' },
+      { name: '清洁站', emoji: '🏭' },
+      { name: '洁净乐园', emoji: '✨' },
+    ],
+  }),
+  coin: orderChain({
+    key: 'coin',
+    name: '货币链',
+    sprite: 'coin',
+    bg: '#FFF3C4',
+    fg: '#633806',
+    fx: '#E6B422',
+    gold: true,
+    steps: [
+      { name: '铜币', emoji: '🪙' },
+      { name: '银币', emoji: '🥈' },
+      { name: '金币袋', emoji: '💰' },
+      { name: '钱箱', emoji: '🗃️' },
+      { name: '保险柜', emoji: '🔐' },
+      { name: '金库', emoji: '🏦' },
+      { name: '银行', emoji: '🏛️' },
+      { name: '乐园集团', emoji: '👑' },
+    ],
+  }),
 }
 
 /** 会出现在订单里的链。设施链是产出源头、礼包链是产出工具，都不作为交付物 */
-export const CHAIN_ORDER: ChainKey[] = ['toy', 'care', 'food']
+export const CHAIN_ORDER: ChainKey[] = ['toy', 'care', 'food', 'comfort', 'train', 'med', 'clean', 'coin']
 
 /** 图鉴与链树面板的展示顺序：设施排第一，因为它是所有产出的源头 */
-export const TREE_ORDER: ChainKey[] = ['fac', 'toy', 'care', 'food', 'supply']
+export const TREE_ORDER: ChainKey[] = ['fac', 'toy', 'care', 'food', 'supply', 'comfort', 'train', 'med', 'clean', 'coin']
 
 /**
  * 链深度版本。

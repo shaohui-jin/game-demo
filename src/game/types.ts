@@ -19,7 +19,17 @@
  * 把它建模成一条链而不是"另一种东西"，是为了让棋盘对象、拖拽、背包、存档、渲染
  * 全都复用同一套机制 —— 设施在系统眼里就是"一个可点击的链物品"。
  */
-export type ChainKey = 'fac' | 'toy' | 'care' | 'food' | 'supply'
+export type ChainKey =
+  | 'fac'
+  | 'toy'
+  | 'care'
+  | 'food'
+  | 'supply'
+  | 'comfort'
+  | 'train'
+  | 'med'
+  | 'clean'
+  | 'coin'
 
 // ==================== 掉落表 ====================
 
@@ -253,7 +263,15 @@ export type CellIndex = number
  * 与合成链物品的**本质差别**：道具不入链、不合成、**可堆叠带数量**、只能作用于别的物品。
  * 后续新增道具只需在这里加一个 key，再到 tools.ts 补定义。
  */
-export type ToolKey = 'scissors' | 'upgradeCard' | 'charger' | 'hourglass' | 'orb'
+export type ToolKey =
+  | 'scissors'
+  | 'upgradeCard'
+  | 'charger'
+  | 'hourglass'
+  | 'orb'
+  | 'orbGreen'
+  | 'orbPurple'
+  | 'infinite'
 
 /** 背包里的一叠特殊道具 */
 export interface ToolStack {

@@ -24,6 +24,7 @@ import {
 } from './config'
 import { TOOL_ORDER } from './tools'
 import type { ChainKey, ToolKey } from './types'
+import { pickDecorKey, pickSkin } from './content'
 
 // ==================== 类型 ====================
 
@@ -51,8 +52,12 @@ export interface LuckyPrize {
   /** gold 的数量 / tool 的数量 / skin·decor 转换成的钻石数量 */
   amount: number
   tool?: ToolKey
+  /** 造型 key。是否折成钻石由存档决定（已拥有才折） */
+  skinKey?: string
+  /** 装饰 key */
+  decorKey?: string
   rarity: Rarity
-  /** 造型 / 装饰当前是"视为重复自动转换"（M3 接入真实造型后此标记会消失） */
+  /** 重复的造型 / 装饰才会在发奖时改成 true */
   converted: boolean
 }
 
@@ -306,9 +311,9 @@ export function spinOnce(
     const count = 1 + Math.floor(rng() * 2) // 1–2 个
     prize = { kind: 'tool', amount: count, tool, rarity: 'common', converted: false }
   } else if (pick.kind === 'skin') {
-    prize = { kind: 'skin', amount: LUCKY_SKIN_TO_GEM, rarity: 'rare', converted: true }
+    prize = { kind: 'skin', amount: 0, skinKey: pickSkin(rng).key, rarity: 'rare', converted: false }
   } else {
-    prize = { kind: 'decor', amount: LUCKY_DECOR_TO_GEM, rarity: 'rare', converted: true }
+    prize = { kind: 'decor', amount: 0, decorKey: pickDecorKey(rng), rarity: 'rare', converted: false }
   }
 
   // 保底计数：出稀有清零；普通 +1（普通奖励不会把它推过窗口，因为强制逻辑在前面）

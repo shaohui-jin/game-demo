@@ -21,8 +21,8 @@ function storeAway(): void {
 
 <template>
   <div class="infobar">
-    <div class="back" title="存档 / 备份 / 导出" @click="store.openSettings()">
-      <SpriteIcon name="ico-back" fallback="🗄" />
+    <div class="back" title="返回乐园" @click="store.leaveBoard()">
+      <SpriteIcon name="ico-back" fallback="↩" />
     </div>
     <!-- eslint-disable-next-line vue/no-v-html — 内容由 store 内部生成，不含外部输入 -->
     <div class="hint" v-html="hintHTML"></div>

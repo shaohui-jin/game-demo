@@ -54,7 +54,9 @@ body {
 }
 
 #app {
+  position: relative;
   max-width: 460px;
+  min-height: 100dvh;
   margin: 0 auto;
   padding: 8px 10px 14px;
 }

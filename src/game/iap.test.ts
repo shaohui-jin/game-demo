@@ -166,14 +166,15 @@ describe('抽奖机', () => {
     expect(t1.prize.amount).toBeLessThanOrEqual(2)
   })
 
-  it('造型 / 装饰当前按"重复获得"折算成钻石（M3 前的过渡口径）', () => {
+  it('造型 / 装饰先给出具体物品，重复折算由发奖时决定', () => {
     const s = spinOnce(0, seq([0.01]))
     expect(s.prize.kind).toBe('skin')
-    expect(s.prize.converted).toBe(true)
-    expect(s.prize.amount).toBeGreaterThan(0)
+    expect(s.prize.converted).toBe(false)
+    expect(s.prize.skinKey).toBeTruthy()
     const d = spinOnce(0, seq([0.05]))
     expect(d.prize.kind).toBe('decor')
-    expect(d.prize.converted).toBe(true)
+    expect(d.prize.converted).toBe(false)
+    expect(d.prize.decorKey).toBeTruthy()
   })
 
   it('十连里最多触发一次保底（触发后计数清零）', () => {

@@ -48,6 +48,22 @@ export const CUSTOMERS: readonly CustomerDef[] = [
   { key: 'corgi', name: '柯基', emoji: '🐕', sprite: 'cust-corgi', camp: 'dog', tag: '短腿欢脱，屁股是资产', likes: 'supply', quote: '短腿也能跑很快的！' },
   { key: 'shiba', name: '柴犬', emoji: '🐶', sprite: 'cust-shiba', camp: 'dog', tag: '傻笑，表情包本体', likes: 'food', quote: '嘿嘿。嘿嘿嘿嘿。' },
   { key: 'golden', name: '金毛', emoji: '🦮', sprite: 'cust-golden', camp: 'dog', tag: '暖男，对谁都好', likes: 'supply', quote: '需要帮忙吗？我随时都在。' },
+  { key: 'tabby', name: '狸花猫', emoji: '🐈‍⬛', sprite: 'cust-tabby', camp: 'cat', tag: '野性，拆家第一名', likes: 'toy', quote: '抓板是我的。第二块也是。' },
+  { key: 'black', name: '黑猫', emoji: '🐈', sprite: 'cust-black', camp: 'cat', tag: '神秘，走路没声音', likes: 'med', quote: '走路没声音是优点。' },
+  { key: 'white', name: '白猫', emoji: '🐱', sprite: 'cust-white', camp: 'cat', tag: '优雅，洁癖严重', likes: 'care', quote: '地上有一根毛。不是我的。' },
+  { key: 'calico', name: '三花猫', emoji: '😻', sprite: 'cust-calico', camp: 'cat', tag: '幸运，抽奖手气好', likes: 'coin', quote: '抽奖之前先摸我一下。' },
+  { key: 'teddy', name: '泰迪', emoji: '🐩', sprite: 'cust-teddy', camp: 'dog', tag: '机灵，会察言观色', likes: 'care', quote: '我听得懂你没说出口的话。' },
+  { key: 'lab', name: '拉布拉多', emoji: '🐕', sprite: 'cust-lab', camp: 'dog', tag: '稳重，饭量惊人', likes: 'food', quote: '饭量是信誉。' },
+  { key: 'border', name: '边牧', emoji: '🐶', sprite: 'cust-border', camp: 'dog', tag: '聪明，智商碾压店长', likes: 'train', quote: '这个障碍的间距不对。' },
+  { key: 'frenchie', name: '法斗', emoji: '🐾', sprite: 'cust-frenchie', camp: 'dog', tag: '憨厚，睡着会打呼', likes: 'comfort', quote: '呼……我先躺下听你说。' },
+  { key: 'maine', name: '缅因猫', emoji: '🐱', sprite: 'cust-maine', camp: 'cat', tag: '体型大，门框嫌矮', likes: 'comfort', quote: '门框有点矮。' },
+  { key: 'sphynx', name: '无毛猫', emoji: '😺', sprite: 'cust-sphynx', camp: 'cat', tag: '怕冷，毛衣是生存', likes: 'care', quote: '毛衣不是装饰，是生存。' },
+  { key: 'samoyed', name: '萨摩耶', emoji: '🐺', sprite: 'cust-samoyed', camp: 'dog', tag: '微笑，白色毛发很多', likes: 'clean', quote: '我笑起来像在下雪。' },
+  { key: 'bichon', name: '比熊', emoji: '🐩', sprite: 'cust-bichon', camp: 'dog', tag: '圆，适合当模特', likes: 'care', quote: '圆的比较好抱。' },
+  { key: 'alaska', name: '阿拉斯加', emoji: '🐕', sprite: 'cust-alaska', camp: 'dog', tag: '力气大，想念雪', likes: 'train', quote: '雪是我想念的地板。' },
+  { key: 'dachshund', name: '腊肠', emoji: '🌭', sprite: 'cust-dachshund', camp: 'dog', tag: '短腿，沙发底是办公室', likes: 'comfort', quote: '沙发底下是我的办公室。' },
+  { key: 'pomeranian', name: '博美', emoji: '🐶', sprite: 'cust-pomeranian', camp: 'dog', tag: '不大，声音很大', likes: 'toy', quote: '我不大，声音很大。' },
+  { key: 'tianyuan', name: '中华田园犬', emoji: '🐕', sprite: 'cust-tianyuan', camp: 'dog', tag: '什么活都干过', likes: 'food', quote: '什么活我都干过。' },
 ]
 
 const CUSTOMER_MAP: Record<string, CustomerDef> = {}
@@ -79,6 +95,8 @@ export interface RegionEffect {
   petHours?: number
   /** 开放一个订单档位 */
   openTier?: OrderTier
+  /** 解锁后开放的合成链（与母体解锁可以并存，重复解锁无效果） */
+  openChains?: ChainKey[]
 }
 
 export interface RegionDef {
@@ -184,7 +202,7 @@ export const REGIONS: readonly RegionDef[] = [
     sprite: 'region-studio',
     unlockLevel: 45,
     docBenefit: '拍照功能，生成可保存的乐园明信片',
-    benefit: '明信片导出（第二批实现）',
+    benefit: '可以导出一张乐园明信片',
     effect: {},
   },
 ]

@@ -341,8 +341,8 @@ describe('背包：存入 / 取出', () => {
 
     expect(g.board[0]).toBeNull()
     expect(store.selectedBoard).toBe(-1)
-    // 开局背包里已有 5 格道具（五种各一，升级卡 x2），所以物品落在 index 5
-    expect(g.bag[5]).toEqual({ k: 'item', it: { chain: 'toy', level: 2 } })
+    // 开局背包里已有 8 格道具，所以物品落在 index 8
+    expect(g.bag[8]).toEqual({ k: 'item', it: { chain: 'toy', level: 2 } })
   })
 
   it('背包满时存入失败，物品留在棋盘上', async () => {
@@ -1152,8 +1152,8 @@ describe('图鉴：链路与产出', () => {
     store.openTree()
     await nextTick()
 
-    // 5 条链：设施 / 玩具 / 护理 / 食物 / 礼包
-    expect(w.findAll('.atlas-row').length).toBe(5)
+    // 设施 / 玩具 / 护理 / 食物 / 礼包 / 舒适 / 训练 / 医疗 / 清洁 / 货币
+    expect(w.findAll('.atlas-row').length).toBe(10)
     // 设施链 5 级（3 个点击型 + 2 个自动型）→ 5 个节点（产出源头，必须完整出现在图鉴里）
     const first = w.findAll('.atlas-row')[0]
     expect(first.findAll('.anode').length).toBe(5)
@@ -1494,7 +1494,7 @@ describe('商城（M2）', () => {
     const goldRows = w.findAll('.shop-group')[0].findAll('.shop-row')
     const gemRows = w.findAll('.shop-group')[1].findAll('.shop-row')
     expect(goldRows.length).toBe(5)
-    expect(gemRows.length).toBe(4)
+    expect(gemRows.length).toBe(7)
     // 金币区按钮全部可点（不限购）
     expect(goldRows.every((r) => !r.find('.shop-btn').attributes('disabled'))).toBe(true)
   })

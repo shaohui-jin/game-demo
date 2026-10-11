@@ -10,6 +10,8 @@
 import { CHAINS } from './chains'
 import { BAG_INITIAL_CAP, BAG_TOTAL, ORDER_SLOTS, ORDER_TIERS, SAVE_KEY, SAVE_VERSION, TOTAL } from './config'
 import { customerDef, decorDef, freshRegions, regionDef } from './business'
+import { normalizeLive } from './content'
+import { raisePlotsForChains } from './yard'
 import {
   defOf,
   ensureFacilities,
@@ -171,6 +173,9 @@ function normalize(raw: any): LoadResult | null {
     s.unlocked.supply = true
     dirty = true
   }
+  const prevLive = JSON.stringify(s.live ?? null)
+  s.live = normalizeLive(s.live)
+  if (JSON.stringify(s.live) !== prevLive) dirty = true
 
   if (typeof s.gem !== 'number') (s.gem = 60), (dirty = true)
   if (typeof s.gold !== 'number') (s.gold = 0), (dirty = true)
@@ -409,6 +414,7 @@ function normalize(raw: any): LoadResult | null {
   }
   // 前台大厅是开局区域：任何情况下都必须开着，否则整条区域链会断在这里
   if (!s.regions.lobby) (s.regions.lobby = true), (dirty = true)
+  if (raisePlotsForChains(s.live.plotLv, s.unlocked)) dirty = true
 
   if (!s.decor || typeof s.decor !== 'object') (s.decor = {}), (dirty = true)
   for (const k of Object.keys(s.decor)) {

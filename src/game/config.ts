@@ -83,10 +83,11 @@ export const ORDER_BASE_EXP = 15
 /** 每升一级订单奖励的指数底数 */
 export const ORDER_GROWTH = 1.9
 /**
- * 按链的"派系"给的奖励倍率。索引 = CHAIN_ORDER 下标。
- * 越靠后的链越难发育，因此奖励更高，制造"优先发育哪条链"的取舍。
+ * 按链的"派系"给的奖励倍率。索引 = CHAIN_ORDER 下标：
+ * 玩具 / 护理 / 食物 / 舒适 / 训练 / 医疗 / 清洁 / 货币。
+ * 越靠后的链越难发育，因此奖励更高。
  */
-export const ORDER_CHAIN_MULT = [1, 1.45, 1.95] as const
+export const ORDER_CHAIN_MULT = [1, 1.45, 1.95, 1.35, 2.1, 2.25, 2.4, 2.6] as const
 /** 同时在手的订单数量 */
 export const ORDER_SLOTS = 2
 
@@ -180,6 +181,17 @@ export const DAY_DOG_RATE = 0.65
  * 所以"直接补体力"是最贵的那种道具，用它换一次冲刺是划算且直觉明确的。
  */
 export const ORB_STAMINA = 50
+/** 绿能量球 / 紫能量球。紫 > 蓝 > 绿 */
+export const ORB_GREEN = 30
+export const ORB_PURPLE = 80
+/** 无限能量持续时间 */
+export const INFINITE_MS = 5 * 60 * 1000
+/** 主动放弃订单后，同一链同一等级的禁刷时长 */
+export const ABANDON_MS = 10 * 60 * 1000
+/** 每日任务门槛：合成 / 交付 / 点击产出 */
+export const QUEST_MERGE = 8
+export const QUEST_DELIVER = 1
+export const QUEST_PRODUCE = 6
 
 // ==================== 每日补给（手动型发射器）====================
 

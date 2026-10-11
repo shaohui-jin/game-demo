@@ -85,13 +85,55 @@ export const TOOLS: Record<ToolKey, ToolDef> = {
     bg: '#EEEDFE',
     fg: '#26215C',
     fx: '#7F77DD',
-    desc: '立刻恢复 50 点体力（可以超过上限）',
+    desc: '蓝能量球：立刻恢复 50 点体力（可以超过上限）',
+    target: 'none',
+  },
+  orbGreen: {
+    key: 'orbGreen',
+    name: '绿能量球',
+    emoji: '💚',
+    sprite: 'tool-orb-green',
+    bg: '#E1F5EE',
+    fg: '#04342C',
+    fx: '#1D9E75',
+    desc: '立刻恢复 30 点体力（可以超过上限）',
+    target: 'none',
+  },
+  orbPurple: {
+    key: 'orbPurple',
+    name: '紫能量球',
+    emoji: '💜',
+    sprite: 'tool-orb-purple',
+    bg: '#EEEDFE',
+    fg: '#26215C',
+    fx: '#7F77DD',
+    desc: '立刻恢复 80 点体力（可以超过上限）',
+    target: 'none',
+  },
+  infinite: {
+    key: 'infinite',
+    name: '无限能量',
+    emoji: '🌟',
+    sprite: 'tool-infinite',
+    bg: '#FFF3C4',
+    fg: '#633806',
+    fx: '#E6B422',
+    desc: '5 分钟内点击不消耗体力',
     target: 'none',
   },
 }
 
 /** 商店 / 背包的展示顺序（按"使用频率 × 直觉强度"排） */
-export const TOOL_ORDER: ToolKey[] = ['scissors', 'upgradeCard', 'charger', 'hourglass', 'orb']
+export const TOOL_ORDER: ToolKey[] = [
+  'scissors',
+  'upgradeCard',
+  'charger',
+  'hourglass',
+  'orbGreen',
+  'orb',
+  'orbPurple',
+  'infinite',
+]
 
 /** 四种基础道具的贴图颜色家族不同，方便一眼分辨（用于图鉴/商店未来的分组展示） */
 export const TOOL_FAMILY: Record<ToolKey, 'usage' | 'boost'> = {
@@ -100,6 +142,9 @@ export const TOOL_FAMILY: Record<ToolKey, 'usage' | 'boost'> = {
   charger: 'usage',
   hourglass: 'boost',
   orb: 'boost',
+  orbGreen: 'boost',
+  orbPurple: 'boost',
+  infinite: 'boost',
 }
 
 export function toolDef(key: ToolKey): ToolDef {

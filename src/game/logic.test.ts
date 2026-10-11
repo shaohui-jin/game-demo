@@ -1289,7 +1289,7 @@ describe('findDisplaceCell —— 拖到占用格的挤出规则', () => {
   it('环1：周围 8 格有空位时挤到其中之一', () => {
     const { board, web } = blank()
     // 目标 40（r5,c5）。填满 8 邻域中除 34 以外的所有格 → 唯一环1空位是 34
-    for (const i of [33, 35, 39, 41, 46, 47, 48]) board[i] = makeItem('toy', 1)
+    for (const i of [32, 33, 39, 41, 46, 47, 48]) board[i] = makeItem('toy', 1)
     expect(findDisplaceCell(board, web, 40)).toBe(34)
   })
 

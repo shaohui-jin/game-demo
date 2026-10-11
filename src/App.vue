@@ -32,6 +32,9 @@ import ShopModal from './components/ShopModal.vue'
 import RechargeModal from './components/RechargeModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
 import BackpackModal from './components/BackpackModal.vue'
+import OrderModal from './components/OrderModal.vue'
+import YardView from './components/YardView.vue'
+import ParkModal from './components/ParkModal.vue'
 import FxCanvas from './components/FxCanvas.vue'
 import FloatLayer from './components/FloatLayer.vue'
 import FlyerLayer from './components/FlyerLayer.vue'
@@ -46,7 +49,9 @@ onBeforeUnmount(() => store.dispose())
 <template>
   <FxCanvas />
 
-  <div class="screen">
+  <YardView v-show="store.scene === 'yard'" />
+
+  <div class="screen" v-show="store.scene === 'board'">
     <HudBar />
     <ToolBar />
     <GameBoard />
@@ -76,6 +81,27 @@ onBeforeUnmount(() => store.dispose())
 
   <Transition name="fade">
     <SettingsModal v-if="store.settingsOpen" />
+  </Transition>
+
+  <Transition name="fade">
+    <OrderModal v-if="store.orderOpen" />
+  </Transition>
+
+  <Transition name="fade">
+    <ParkModal v-if="store.parkOpen" />
+  </Transition>
+
+  <Transition name="fade">
+    <div v-if="store.needsBackupPrompt" class="modal">
+      <div class="card">
+        <h3>先备份一份</h3>
+        <p class="sub">这台设备上的存档就是全部进度。现在写一份备份，以后坏了还能从设置里找回。</p>
+        <div class="row">
+          <button class="set-btn" @click="store.ackBackup()">现在备份</button>
+          <button class="set-btn" @click="store.skipBackup()">以后再说</button>
+        </div>
+      </div>
+    </div>
   </Transition>
 
   <ToastLayer />

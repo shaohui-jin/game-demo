@@ -18,6 +18,7 @@ const store = useGameStore()
 const { saveMeta, backups } = storeToRefs(store)
 
 const importText = ref('')
+const shareText = ref('')
 const importing = ref(false)
 
 function fmtAt(ts: number): string {
@@ -123,6 +124,28 @@ function onReset(): void {
       ></textarea>
       <div class="set-actions">
         <button class="set-btn big" :disabled="importing" @click="onImport">导入并覆盖当前进度</button>
+      </div>
+
+      <div class="set-sec">外观</div>
+      <div class="set-actions">
+        <button class="set-btn big" @click="store.setTheme('cat')">猫的样子</button>
+        <button class="set-btn big" @click="store.setTheme('dog')">狗的样子</button>
+      </div>
+
+      <div class="set-sec">游玩与分享</div>
+      <p class="set-note" v-if="store.g">
+        合成 {{ store.g.merges }} 次 · 交付 {{ store.g.live.delivers }} 单 · 点击产出 {{ store.g.produces }} 次 ·
+        游玩约 {{ Math.floor(store.g.live.playMs / 60000) }} 分钟
+      </p>
+      <div class="set-actions">
+        <button class="set-btn big" @click="store.toggleSound()">
+          {{ store.g?.live.sound ? '关闭音效' : '打开音效' }}
+        </button>
+        <button class="set-btn big" @click="shareText = store.shareCode()">复制布局码到下面</button>
+      </div>
+      <textarea v-model="shareText" class="set-area" rows="3" placeholder="乐园布局分享码（paw1. 开头）" spellcheck="false"></textarea>
+      <div class="set-actions">
+        <button class="set-btn big" @click="store.importShare(shareText)">导入布局</button>
       </div>
 
       <div class="set-sec danger">危险区</div>
