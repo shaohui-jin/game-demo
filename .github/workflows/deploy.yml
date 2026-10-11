@@ -5,9 +5,8 @@
 #       https://<owner>.github.io/<repo>/
 #       当前即 https://shaohui-jin.github.io/game-demo/
 #
-# ★ 首次启用需要一次手动设置（只做一次）：
-#       仓库 Settings → Pages → Build and deployment → Source 选 **GitHub Actions**
-#   不选的话 deploy 步骤会报 "Pages not enabled"。
+# Pages 站点由 configure-pages 的 enablement 在第一次部署时自动打开，
+# 来源固定为 GitHub Actions。仓库此前未启用 Pages 时，不带这个参数会 404。
 #
 # base 路径：项目页部署在 /<repo>/ 子路径下，构建时注入 VITE_BASE
 #（见 vite.config.ts 的 base），本地构建不受影响。
@@ -55,6 +54,8 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
