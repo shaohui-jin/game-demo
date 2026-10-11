@@ -1691,7 +1691,7 @@ describe('充值中心（M2 剩余）', () => {
     expect(g.gem).toBeGreaterThanOrEqual(g0 - 500)
     expect(g.gem).toBeLessThanOrEqual(g0 - 500 + 11 * 120)
     expect(store.luckyHistory.length).toBe(10)
-    expect(store.g.gem).toBeGreaterThanOrEqual(0)
+    expect(g.gem).toBeGreaterThanOrEqual(0)
   })
 
   it('抽奖：余额不足直接拒绝，不扣钱', async () => {

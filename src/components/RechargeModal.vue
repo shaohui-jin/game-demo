@@ -114,7 +114,7 @@ function close(): void {
     <div class="card shop-card">
       <div class="bag-head">
         <span class="bag-title">充值中心</span>
-        <span class="bag-gold">💎 {{ g?.gem ?? 0 }}</span>
+        <span class="bag-gold">💎 {{ store.g?.gem ?? 0 }}</span>
         <button class="bag-x" @click="close()">✕</button>
       </div>
 
