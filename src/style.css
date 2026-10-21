@@ -3367,3 +3367,593 @@ body {
   overflow: hidden;
   height: 100%;
 }
+
+/* ==========================================================================
+   水彩绘本 · C 换肤层（2026-10-21 · DESIGN-C-水彩绘本.md v1.0）
+   ==========================================================================
+   定位与上一版贴纸层相同：**只覆盖视觉属性，不改任何布局尺寸与动画参数**。
+   按本文件既有铁律，换肤规则永远追加在末尾 —— 后写的赢，旧贴纸层暂留作回滚点，
+   M0 收尾时整体删除（DESIGN.md §9）。
+
+   四条构成规则：
+     ① 衬纸边签名 —— 3px 白纸边 + 1px 炭铅细圈（box-shadow 两层），不用 border
+     ② 淡彩落影 —— 低透明度暖影，不用硬落影
+     ③ 手绘感在 SVG 内部（炭铅 #B98A5E 描边），CSS 不做变形、不旋转
+     ④ 纸面是平涂奶油色，纹理只出现在装饰面（棋盘与贴图零纹理，性能铁律）
+   ========================================================================== */
+
+:root {
+  /* 纸面与墨 */
+  --surface: #fbf4e6;
+  --surface-2: #f1ede2;
+  --cell: #faf7ee;
+  --grid-line: #e4dccc;
+  --card: #fffdf7;
+  --paper: #ffffff;
+  --pencil: #b98a5e;
+  --ink: #4f4235;
+  --ink-2: #97836d;
+  --ink-3: #bfb3a0;
+  --ink-4: #cfc4b0;
+  --line: #e4dccc;
+  --line-2: #efe9dc;
+  --bg: #fbf4e6;
+  --board-bg: #f1ede2;
+
+  /* 旧变量名兼容（贴纸层仍在引用） */
+  --paper-2: #f6efe2;
+  --paper-3: #efe6d6;
+  --cut: #fffdf7;
+
+  /* 功能色 */
+  --amber: #a8842f;
+  --amber-lt: #f8f0dd;
+  --amber-dk: #7e6220;
+  --green: #7f9765;
+  --green-lt: #ebf0e4;
+  --green-dk: #5f7a4e;
+  --rose: #b88284;
+  --rose-lt: #f4e7e7;
+  --blue: #5b93b8;
+  --blue-lt: #e6eef4;
+  --purple: #8b7cf6;
+  --gold: #c9a24b;
+  --coral: #c9603f;
+  --go: #4a463e;
+
+  /* 落点状态（三方向共享） */
+  --st-ok: #6fbf73;
+  --st-sel: #3a6ea5;
+  --st-bag: #6fc0e8;
+  --st-sac: #9b6bd6;
+  --st-swap: #f2a03d;
+
+  /* 纸边 + 淡彩影配方（替换贴纸层的硬落影） */
+  --stk-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(79, 66, 53, 0.14),
+    0 3px 8px rgba(199, 122, 90, 0.14);
+  --stk-card: 0 0 0 3px #fff, 0 0 0 4px rgba(79, 66, 53, 0.14),
+    0 6px 18px rgba(199, 122, 90, 0.16);
+  --stk-press: 0 0 0 3px #fff, 0 0 0 4px rgba(79, 66, 53, 0.2);
+
+  /* 字体 */
+  --font-body: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC",
+    "SimSun", serif;
+  --font-num: "Kaiti SC", "STKaiti", "KaiTi", "Noto Serif CJK SC", serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans SC",
+    "Microsoft YaHei", sans-serif;
+}
+
+/* ---------------- 纸面 ---------------- */
+html,
+body {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+/* 数字与标题：楷体（绘本手写感），等宽对齐优先 */
+.coin .val,
+.bag-gold,
+.decor-lv,
+.cust-num,
+.spawner .cost,
+.hud .val {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 小字号（≤11px）一律无衬线，避免衬线在低 DPI 下发虚 */
+.tool .t2,
+.coin .sub,
+.item .lv,
+.item .use,
+.item .stack,
+.web .wp,
+.expand-price,
+.bag-foot,
+.decor-lv,
+.cust-num,
+.region-lv,
+.region-benefit,
+.region-btn,
+.biz-group-t,
+.rt .tag,
+.bag-cap .pill {
+  font-family: var(--font-ui);
+}
+
+/* ---------------- 顶部 HUD ---------------- */
+.coin {
+  background: var(--card);
+  border: 2px solid var(--cut);
+  border-radius: 12px;
+  box-shadow: var(--stk-shadow);
+}
+.coin .bar {
+  background: var(--surface-2);
+  box-shadow: inset 0 1px 2px rgba(79, 66, 53, 0.12);
+}
+.coin .bar i {
+  background: #9dbbd4;
+}
+/* 可领补贴：纸边呼吸，不用发光脉冲 */
+.coin.stamina.bonus {
+  border-color: var(--cut);
+  background: #fffaf0;
+  animation: wcBreath 1.8s ease-in-out infinite;
+}
+@keyframes wcBreath {
+  0%,
+  100% {
+    box-shadow: var(--stk-shadow);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(201, 162, 75, 0.5),
+      0 3px 8px rgba(199, 122, 90, 0.14);
+    opacity: 0.94;
+  }
+}
+.coin.star {
+  background: #fffaf0;
+  border-color: var(--cut);
+}
+.coin.star .val {
+  color: var(--amber-dk);
+}
+
+/* ---------------- 功能栏 ---------------- */
+.tool {
+  background: var(--card);
+  border: 2px solid var(--cut);
+  border-radius: 12px;
+  box-shadow: var(--stk-shadow);
+}
+.tool.hot {
+  border-color: var(--cut);
+  background: #fffaf0;
+}
+.tool:active {
+  transform: none;
+  translate: 0 2px;
+  box-shadow: var(--stk-press);
+}
+.tool.go {
+  background: var(--cta, #4a463e);
+  border-color: var(--cut);
+  border-radius: 10px;
+}
+.tool.go .t1 {
+  color: #fbf4e6;
+}
+.tool.go.ready {
+  animation: wcBreath 1.8s ease-in-out infinite;
+}
+.hotdot {
+  background: var(--coral);
+  box-shadow: 0 0 0 2px #fffdf7;
+}
+
+/* ---------------- 棋盘 ---------------- */
+.board {
+  border: 2px solid var(--cut);
+  border-radius: 12px;
+  background: var(--surface-2);
+  box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(79, 66, 53, 0.14),
+    0 6px 18px rgba(199, 122, 90, 0.14);
+}
+.cell {
+  border: 1.5px solid var(--grid-line);
+  border-radius: 8px;
+  background: var(--cell);
+  box-shadow: none;
+}
+/* 锁定格：斜纹 + 炭铅锁（不用 emoji 字形） */
+.cell.locked {
+  background: repeating-linear-gradient(45deg, #efe9da 0 5px, #e6ddc8 5px 10px);
+  border-color: rgba(79, 66, 53, 0.08);
+}
+.cell.locked::after {
+  background: #b3a58d;
+}
+.cell.locked::before {
+  border-color: #a3957d;
+}
+/* 拖拽落点：状态色（三方向共享） */
+.cell.ok {
+  outline: 2px solid var(--st-ok);
+  outline-offset: -2px;
+  background: #f2f8f2;
+}
+.cell.merge {
+  outline: 2px solid var(--st-ok);
+  outline-offset: -2px;
+  background: #eef7ef;
+}
+.cell.websac {
+  outline: 2px solid var(--st-sac);
+  outline-offset: -2px;
+  background: #f5f0fb;
+}
+.cell.displace {
+  outline: 2px dashed var(--st-swap);
+  outline-offset: -2.5px;
+  background: #fdf3e6;
+}
+.cell.bagstore {
+  outline: 2.5px solid var(--st-bag);
+  outline-offset: -2.5px;
+  background: #eef7fc;
+}
+.cell.tool-zone {
+  box-shadow: inset 0 0 0 2px rgba(58, 110, 165, 0.5);
+  background: #f0f5fa;
+}
+
+/* ---------------- 物品 = 一张贴纸 ---------------- */
+.item {
+  inset: 1px;
+  border: 2px solid var(--cut);
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(79, 66, 53, 0.12),
+    0 2px 5px rgba(199, 122, 90, 0.16);
+  padding: 2px;
+}
+.item.gen {
+  outline: 2.5px solid #9e6242;
+  outline-offset: -3px;
+}
+.item.mid {
+  outline: 2px dashed #9e6242;
+  outline-offset: -3px;
+}
+.item.fin {
+  outline: 2px dashed var(--paper);
+  outline-offset: -5px;
+}
+.item.fac {
+  box-shadow: inset 0 0 0 2px #9e6242, 0 0 0 2px #fff,
+    0 0 0 3px rgba(79, 66, 53, 0.12), 0 2px 5px rgba(199, 122, 90, 0.16);
+}
+.item.sel {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--st-sel),
+    0 0 12px rgba(58, 110, 165, 0.4), 0 2px 5px rgba(199, 122, 90, 0.16);
+}
+.item.glow {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(184, 130, 132, 0.5),
+    0 0 12px rgba(184, 130, 132, 0.45), 0 2px 5px rgba(199, 122, 90, 0.16);
+}
+.item.dragging {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(79, 66, 53, 0.2),
+    0 10px 20px rgba(79, 66, 53, 0.26);
+}
+.item.tool-item {
+  outline: 2px dashed rgba(158, 98, 66, 0.7);
+  outline-offset: -4px;
+}
+/* 角标：等级左下 / 耐久右上 / 数量右下 */
+.item .lv {
+  right: auto;
+  left: -3px;
+  bottom: -3px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.5;
+  opacity: 1;
+  color: #fbf4e6;
+  background: var(--ink);
+  border-radius: 99px;
+  min-width: 14px;
+  text-align: center;
+  padding: 0 4px;
+  box-shadow: 0 0 0 2px var(--cut);
+}
+.item .use {
+  left: auto;
+  right: -3px;
+  top: -3px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.5;
+  opacity: 1;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 99px;
+  min-width: 14px;
+  text-align: center;
+  padding: 0 4px;
+  box-shadow: 0 0 0 2px var(--cut);
+}
+.item.gen .use {
+  background: var(--gold);
+  border-radius: 99px;
+  padding: 0 4px;
+}
+.item .stack {
+  right: -3px;
+  bottom: -3px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.5;
+  background: var(--coral);
+  border-radius: 99px;
+  padding: 0 4px;
+  box-shadow: 0 0 0 2px var(--cut);
+}
+.item .tool-mark {
+  right: -3px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  background: var(--amber);
+  box-shadow: 0 0 0 2px var(--cut);
+}
+/* 冷却遮罩 */
+.item .cdmask {
+  background: rgba(251, 244, 230, 0.78);
+  color: var(--ink-2);
+}
+.item .cdmask::after {
+  background: var(--green);
+}
+
+/* ---------------- 蛛网 ---------------- */
+.web {
+  inset: 1px;
+  border: 2px solid var(--cut);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fffdf7, #f3ead6);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(79, 66, 53, 0.12),
+    0 2px 5px rgba(199, 122, 90, 0.16);
+  font-size: 15px;
+}
+.web .wp {
+  right: -2px;
+  bottom: -2px;
+  font-size: 8.5px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--coral);
+  border-radius: 99px;
+  padding: 0 4px;
+  box-shadow: 0 0 0 2px var(--cut);
+}
+
+/* ---------------- 状态角标 / 飞行体 ---------------- */
+.badge {
+  background: var(--st-ok);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--cut), 0 1px 3px rgba(79, 66, 53, 0.22);
+}
+.flyer {
+  border: 2px solid var(--cut);
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(79, 66, 53, 0.14),
+    0 6px 14px rgba(79, 66, 53, 0.2);
+}
+
+/* ---------------- 底部信息栏 ---------------- */
+.infobar .hint {
+  background: var(--card);
+  border: 2px solid var(--cut);
+  border-radius: 12px;
+  box-shadow: var(--stk-shadow);
+  color: var(--ink);
+  font-weight: 600;
+}
+.infobar .shop,
+.infobar .back {
+  background: var(--card);
+  border: 2px solid var(--cut);
+  border-radius: 12px;
+  box-shadow: var(--stk-shadow);
+}
+.infobar .shop:active,
+.infobar .back:active {
+  transform: none;
+  translate: 0 2px;
+  box-shadow: var(--stk-press);
+  background: var(--card);
+}
+.infobar .shop.act {
+  border-color: var(--cut);
+  background: #eef4ee;
+}
+.infobar .shop.act .tx {
+  color: var(--green-dk);
+}
+
+/* ---------------- 弹窗 ---------------- */
+.modal {
+  background: rgba(79, 66, 53, 0.42);
+}
+.modal .card {
+  background: var(--card);
+  border: 3px solid var(--cut);
+  border-radius: 16px;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(79, 66, 53, 0.16),
+    0 18px 40px rgba(79, 66, 53, 0.26);
+}
+.modal h3 {
+  font-family: var(--font-num);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.modal .close {
+  background: var(--cta, #4a463e);
+  color: #fbf4e6;
+  border-radius: 10px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+}
+/* 弹窗标题：从「和纸胶带」改为「楷体书名」——纸胶带是旧贴纸风的签名，C 不继承 */
+.bag-title {
+  rotate: 0deg;
+  clip-path: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font-num);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 1px;
+}
+.bag-gold {
+  background: var(--amber-lt);
+  border-radius: 99px;
+  color: var(--amber-dk);
+  font-weight: 800;
+}
+.bag-x {
+  background: var(--card);
+  border: 2px solid var(--cut);
+  border-radius: 50%;
+  box-shadow: var(--stk-shadow);
+  color: var(--ink-2);
+}
+.bag-x:active {
+  translate: 0 2px;
+  box-shadow: var(--stk-press);
+}
+.bag-cap .pill {
+  border: 2px solid var(--cut);
+  box-shadow: var(--stk-shadow);
+  font-weight: 800;
+  background: var(--amber-lt);
+  color: var(--amber-dk);
+}
+.bag-cap .pill.alt {
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+.bag-cell.locked {
+  background: repeating-linear-gradient(45deg, #efe9da 0 5px, #e6ddc8 5px 10px);
+  border-color: rgba(79, 66, 53, 0.08);
+}
+.bag-cell .lock::after {
+  background: #b3a58d;
+}
+.bag-cell .lock::before {
+  border-color: #a3957d;
+}
+.bag-cell.expand {
+  background: var(--card);
+  border: 2px dashed #cbbfa8;
+  box-shadow: var(--stk-shadow);
+}
+.bag-cell.expand:active {
+  background: var(--card);
+  translate: 0 2px;
+  box-shadow: var(--stk-press);
+}
+.expand-ico {
+  color: var(--amber-dk);
+}
+
+/* ---------------- 经营层：装饰 / 区域 / 顾客 ---------------- */
+.biz-tab {
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  border-radius: 10px;
+  color: var(--ink-2);
+}
+.biz-tab.on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fbf4e6;
+}
+.biz-tab .dot {
+  background: var(--coral);
+}
+.decor-card {
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+}
+.decor-card.owned {
+  border-color: #dcc9a6;
+  background: #fffdf6;
+}
+.decor-bar i {
+  background: var(--gold);
+}
+.decor-btn {
+  border: 1.5px solid var(--amber);
+  background: var(--amber-lt);
+  color: var(--amber-dk);
+  border-radius: 8px;
+}
+.decor-btn.maxed,
+.decor-btn.poor {
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--ink-4);
+}
+.region-row {
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+}
+.region-row.on {
+  border-color: #cfe0c6;
+  background: #fbfdf8;
+}
+.region-row.can {
+  border-color: var(--amber);
+  background: #fffaf0;
+}
+.region-btn {
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  border-radius: 8px;
+}
+.region-btn.go {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fbf4e6;
+}
+.region-btn.done {
+  border-color: #cfe0c6;
+  background: var(--green-lt);
+  color: var(--green-dk);
+}
+.cust-card {
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+}
+.cust-card.pet {
+  border-color: #d9d0e6;
+  background: #fbf9ff;
+}
+.cust-camp.cat {
+  background: var(--rose-lt);
+  color: #7e5254;
+}
+.cust-camp.dog {
+  background: var(--blue-lt);
+  color: #3c6b8a;
+}
+.cust-bar i {
+  background: var(--purple);
+}

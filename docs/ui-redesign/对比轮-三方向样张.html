@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>爪爪乐园 · 三方向 UI 对比样张</title>
+<style>
+/* ============================================================
+   文档框架（三方向共用，刻意保持中立灰，不抢三个方向的戏）
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--doc-bg:#EDEBE6;--doc-card:#FFFFFF;--doc-ink:#2A2A28;--doc-ink2:#6E6C66;--doc-line:#D9D6CF}
+html,body{background:var(--doc-bg);color:var(--doc-ink);font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1560px;margin:0 auto;padding:26px 20px 64px}
+.doc-hd{background:var(--doc-card);border:1px solid var(--doc-line);border-radius:20px;padding:24px 26px}
+.doc-hd h1{font-size:21px;font-weight:900;letter-spacing:.4px}
+.doc-hd h1 .tag{font-size:11px;font-weight:800;color:#8A5B00;background:#FFF3D6;border-radius:99px;padding:3px 10px;vertical-align:3px;margin-left:10px}
+.doc-hd .sub{margin-top:8px;font-size:13px;line-height:1.75;color:var(--doc-ink2)}
+.howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.howto .step{background:#F4F2EC;border-radius:12px;padding:10px 12px;font-size:11.5px;line-height:1.65;color:#4A483F}
+.howto .step b{display:block;font-size:12px;color:var(--doc-ink);margin-bottom:2px}
+.cmp{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}
+.cmp th,.cmp td{border:1px solid var(--doc-line);padding:7px 10px;text-align:left;vertical-align:top;line-height:1.55}
+.cmp th{background:#F4F2EC;font-weight:800;white-space:nowrap}
+.cmp td b{font-weight:800}
+.row{display:flex;gap:22px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.col{width:480px;display:flex;flex-direction:column;gap:14px}
+.col-hd{background:var(--doc-card);border:1px solid var(--doc-line);border-radius:16px;padding:13px 16px}
+.col-hd .nm{font-size:15.5px;font-weight:900}
+.col-hd .nm .rec{font-size:10px;font-weight:800;color:#8A5B00;background:#FFF3D6;border-radius:99px;padding:2px 8px;margin-left:8px;vertical-align:2px}
+.col-hd .dna{font-size:11px;color:var(--doc-ink2);margin-top:3px}
+.col-hd .kw{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+.col-hd .kw i{font-style:normal;background:#F0EEE8;border-radius:6px;padding:2px 8px;font-size:10.5px;color:#4A483F}
+
+/* ============================================================
+   手机框 + 屏幕共用结构（三方向完全一致，差异全部走 CSS 变量）
+   ============================================================ */
+.phone{background:#17161A;border-radius:46px;padding:11px;box-shadow:0 18px 42px rgba(0,0,0,.22)}
+.screen{position:relative;width:458px;border-radius:36px;overflow:hidden;display:flex;flex-direction:column;gap:9px;padding:14px 12px 12px}
+.hud{display:flex;flex-direction:column;gap:8px}
+.hrow{display:flex;gap:8px;align-items:stretch}
+.chip{flex:1;display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:var(--r-card);background:var(--surface);min-width:0}
+.chip .ic{width:19px;height:19px;flex:none}
+.chip .num{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.chip .den{font-size:10.5px;font-weight:700;color:var(--ink-2)}
+.chip.energy{flex:1.3;flex-direction:column;align-items:stretch;gap:5px}
+.chip.lvchip{flex:1.3;flex-direction:column;align-items:stretch;gap:5px}
+.erow{display:flex;align-items:center;gap:6px}
+.bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px}
+.tools{display:flex;gap:7px}
+.tbtn{flex:1;border:0;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 4px;border-radius:var(--r-card);background:var(--surface);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;position:relative}
+.tbtn .ic{width:17px;height:17px}
+.tbtn .dot{position:absolute;top:-5px;right:-3px;min-width:16px;height:16px;border-radius:99px;background:var(--warn);color:#fff;font-size:9.5px;font-weight:900;line-height:16px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
+.tbtn .hotdot{position:absolute;top:5px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 2px var(--surface)}
+.tbtn.go{flex:0 0 auto;padding:10px 15px;background:var(--cta);color:var(--cta-ink);font-size:13px;font-weight:900;box-shadow:var(--cta-shadow,0 4px 10px rgba(0,0,0,.12))}
+.board{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:10px;border-radius:var(--r-board);background:var(--surface-2)}
+.cell{position:relative;aspect-ratio:1;border-radius:var(--r-cell);background:var(--cell)}
+.cell .tile{position:absolute;inset:2px;border-radius:var(--r-item);display:grid;place-items:center;box-shadow:var(--tile-shadow)}
+.t-toy .tile{background:var(--toy-soft)}
+.t-care .tile{background:var(--care-soft)}
+.t-food .tile{background:var(--food-soft)}
+.t-fac .tile{background:var(--fac-soft)}
+.spr{width:74%;height:74%}
+.cell.locked{display:grid;place-items:center}
+.cell.locked .lic{width:44%;height:44%;opacity:.5}
+.cell.webbed{display:grid;place-items:center}
+.cell.webbed .wic{width:72%;height:72%}
+.wbadge{position:absolute;right:-2px;bottom:-2px;font-size:9px;font-weight:900;color:#fff;background:var(--warn);border-radius:99px;padding:0 4px;line-height:1.55;box-shadow:0 0 0 2px var(--surface-2)}
+.cell .lv{position:absolute;left:-3px;bottom:-3px;font-size:9px;font-weight:900;line-height:1.55;color:var(--surface);background:var(--ink);border-radius:99px;min-width:14px;text-align:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface-2)}
+.cell .dur{position:absolute;right:-3px;top:-3px;font-size:9px;font-weight:900;line-height:1.55;color:#5C3A06;background:var(--gold);border-radius:99px;min-width:14px;text-align:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface-2)}
+.cell .res{position:absolute;right:-3px;top:-3px;font-size:9px;font-weight:900;line-height:1.55;color:#fff;background:var(--fac);border-radius:99px;min-width:14px;text-align:center;padding:0 4px;box-shadow:0 0 0 2px var(--surface-2)}
+.cell.gen .tile{outline:2.5px solid var(--emit);outline-offset:-3px}
+.cell.genmid .tile{outline:2px dashed var(--emit);outline-offset:-3px}
+.cell.fac .tile{box-shadow:inset 0 0 0 2px var(--fac-d),var(--tile-shadow)}
+.cell.ex .tile{box-shadow:0 0 0 3px var(--ok),var(--tile-shadow)}
+.exb{position:absolute;left:-4px;top:-4px;width:15px;height:15px;border-radius:50%;background:var(--ok);color:#fff;font-size:9.5px;font-weight:900;display:grid;place-items:center;box-shadow:0 0 0 2px var(--surface-2)}
+.infobar{display:flex;gap:7px;align-items:stretch}
+.infobar .hint{flex:1;background:var(--surface);border-radius:var(--r-card);padding:10px 12px;font-size:11.5px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ibtn{border:0;font-family:inherit;background:var(--surface);border-radius:var(--r-card);padding:0 12px;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--ink);cursor:pointer}
+.ibtn .ic{width:17px;height:17px}
+.ibtn.icon{padding:0 11px}
+
+/* ============================================================
+   风格板（每个手机框下方的专项展示）
+   ============================================================ */
+.spec{background:var(--doc-card);border:1px solid var(--doc-line);border-radius:16px;padding:14px 16px}
+.sp{margin-bottom:14px}
+.sp:last-child{margin-bottom:0}
+.sp h4{font-size:12px;font-weight:900;color:var(--doc-ink);margin-bottom:8px}
+.sp h4 em{font-style:normal;font-weight:600;color:var(--doc-ink2);font-size:10.5px}
+.pals{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pchip{display:flex;align-items:center;gap:7px;background:#F7F5F0;border-radius:9px;padding:5px 8px}
+.pchip .sw{width:16px;height:16px;border-radius:5px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.pchip .nm{font-size:10.5px;font-weight:700;color:#4A483F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pchip .hx{font-size:9.5px;color:#8A8880;margin-left:auto;font-variant-numeric:tabular-nums}
+.typo{background:#F7F5F0;border-radius:10px;padding:12px 14px}
+.t-num{font-size:27px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.3px}
+.t-title{font-size:15px;font-weight:800;margin-top:3px}
+.t-body{font-size:11.5px;margin-top:4px;opacity:.75}
+.samps{display:flex;gap:6px;flex-wrap:nowrap}
+.samp{flex:1;min-width:0;text-align:center}
+.samp .sbox{aspect-ratio:1;border-radius:12px;display:grid;place-items:center;margin-bottom:4px}
+.t-toy .sbox{background:#FFE4EC}
+.t-fac .sbox{background:#FFE3D6}
+.t-cust .sbox{background:#FDEBD8}
+.spr.big{width:52px;height:52px}
+.samp b{display:block;font-size:10.5px;font-weight:800;color:#3A3833;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.samp span{display:block;font-size:9px;color:#8A8880;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.stchip{display:flex;align-items:center;gap:6px;background:#F7F5F0;border-radius:9px;padding:5px 9px;font-size:10.5px;font-weight:700;color:#4A483F}
+.stchip .sw{width:14px;height:14px;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.bdgs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10.5px;color:#8A8880}
+.bdgs .lv,.bdgs .dur,.bdgs .res{position:static;box-shadow:none;display:inline-block}
+.doc-ft{margin-top:26px;background:var(--doc-card);border:1px solid var(--doc-line);border-radius:16px;padding:18px 22px;font-size:12px;line-height:1.8;color:#4A483F}
+.doc-ft p{margin-bottom:6px}
+.doc-ft .note{color:#8A8880;font-size:11px}
+</style>
+</head>
+<body>
+<style>
+/* ============================================================
+   方向 A · 软糯黏土（彩格调首推）
+   令牌来源：phase2-设计系统候选.md · Airbnb 圆角 + Miro 俏皮
+   ============================================================ */
+.col.dir-a{
+  --surface:#FFF6EA;--surface-2:#F8E9D5;--cell:#FCF2E2;--grid-line:#EFDCC2;
+  --ink:#5C4A38;--ink-2:#9A8672;--ink-3:#C4B49E;
+  --toy:#F2A2B8;--toy-d:#D97F9B;--toy-l:#F9C9D6;--toy-soft:#FBE4EB;
+  --care:#8DB580;--care-d:#6E9A63;--care-l:#BBDCC0;--care-soft:#E7F1E5;
+  --food:#F7CE68;--food-d:#DFB04A;--food-l:#FBE3A0;--food-soft:#FCF3D9;
+  --fac:#E69B62;--fac-d:#C9803F;--fac-l:#F2BD93;--fac-soft:#FAE7D4;
+  --cust:#F2B97E;--cust-d:#D89A5E;--cust-l:#FBD9B4;--cust-soft:#FAEBD8;
+  --gold:#F2B63C;--gold-d:#D89A22;--gold-l:#F8D78A;
+  --gem:#6FC0E8;--gem-d:#4AA5D4;--gem-l:#A8DCF4;
+  --energy:#FF8095;--energy-d:#E5627A;--energy-l:#FFB9C4;
+  --ok:#6FBF73;--sel:#B85C1F;--bag:#6FC0E8;--web:#A8906C;--swap:#F2A03D;--sac:#9B6BD6;
+  --warn:#E5604F;
+  --emit:#A85F27;
+  --cta:#A85F27;--cta-ink:#FFF6EA;--cta-shadow:0 6px 14px rgba(168,95,39,.32);
+  --r-board:22px;--r-cell:12px;--r-item:12px;--r-card:18px;
+  --tile-shadow:0 6px 16px rgba(92,74,56,.14),0 2px 0 rgba(92,74,56,.08);
+  --ln-op:0;--lite-op:1;--shd-op:.55;
+  --paper:#FFFFFF;--ic:#E69B62;--ic-d:#C9803F;
+  --font:"PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei",sans-serif;
+}
+.dir-a .screen{font-family:var(--font);background:var(--surface);color:var(--ink)}
+.dir-a .chip,.dir-a .tbtn,.dir-a .infobar .hint,.dir-a .ibtn{box-shadow:0 5px 12px rgba(92,74,56,.10)}
+.dir-a .bar i{background:linear-gradient(90deg,var(--energy-l),var(--energy))}
+.dir-a .board{box-shadow:inset 0 3px 8px rgba(92,74,56,.08),0 12px 26px rgba(92,74,56,.12)}
+.dir-a .cell{background:var(--cell);box-shadow:inset 0 0 0 1px var(--grid-line)}
+.dir-a .cell.locked{background:repeating-linear-gradient(45deg,var(--cell) 0 5px,#F0E4CC 5px 10px)}
+.dir-a .t-toy .sbox{background:var(--toy-soft)}
+.dir-a .t-fac .sbox{background:var(--fac-soft)}
+.dir-a .t-cust .sbox{background:var(--cust-soft)}
+
+/* ============================================================
+   方向 B · 柔光糖果
+   令牌来源：phase2-设计系统候选.md · Apple 材质分层 + Framer 状态层
+   ============================================================ */
+.col.dir-b{
+  --surface:#FFFBF4;--surface-2:#FFF1DE;--cell:#FFF8EC;--grid-line:#F3E2C8;
+  --ink:#54473D;--ink-2:#948779;--ink-3:#BBA998;
+  --toy:#FF8FA3;--toy-d:#E56E85;--toy-l:#FFB8C4;--toy-soft:#FFE7EC;
+  --care:#4EC9AE;--care-d:#2E9E85;--care-l:#8BE3CB;--care-soft:#DDF7EF;
+  --food:#FFD166;--food-d:#E5B04A;--food-l:#FFE5A3;--food-soft:#FFF4D6;
+  --fac:#FF9570;--fac-d:#D2592A;--fac-l:#FFC1AC;--fac-soft:#FFE8DE;
+  --cust:#F6A62A;--cust-d:#D98A0E;--cust-l:#FFC96B;--cust-soft:#FFF0D5;
+  --gold:#FFC531;--gold-d:#E0A800;--gold-l:#FFE08A;
+  --gem:#54C6F0;--gem-d:#2FA5DC;--gem-l:#A5E0F8;
+  --energy:#FF6B8A;--energy-d:#E54E70;--energy-l:#FFA9BA;
+  --ok:#6FBF73;--sel:#E04A2F;--bag:#6FC0E8;--web:#C9A87C;--swap:#F2A03D;--sac:#9B6BD6;
+  --warn:#F2543D;
+  --emit:#D2592A;
+  --cta:linear-gradient(180deg,#FF8A50,#D2592A);--cta-ink:#FFFFFF;--cta-shadow:0 5px 12px rgba(210,89,42,.30);
+  --r-board:16px;--r-cell:12px;--r-item:12px;--r-card:16px;
+  --tile-shadow:0 4px 10px rgba(84,71,61,.12),inset 0 0 0 2px rgba(255,255,255,.66);
+  --ln-op:0;--lite-op:1;--shd-op:.9;
+  --paper:#FFFFFF;--ic:#FF9570;--ic-d:#D2592A;
+  --font:"PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei",sans-serif;
+}
+.dir-b .screen{font-family:var(--font);background:var(--surface);color:var(--ink)}
+.dir-b .chip,.dir-b .tbtn,.dir-b .infobar .hint,.dir-b .ibtn{background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 2px #FFEDE3,0 4px 10px rgba(84,71,61,.08);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+.dir-b .tbtn.go{background:var(--cta);box-shadow:var(--cta-shadow);border-radius:99px;padding:10px 18px}
+.dir-b .bar i{background:linear-gradient(90deg,var(--care-l),var(--care))}
+.dir-b .board{box-shadow:inset 0 0 0 3px #FFEDE3,0 10px 22px rgba(84,71,61,.10)}
+.dir-b .cell{background:var(--cell);box-shadow:inset 0 0 0 1.5px var(--grid-line)}
+.dir-b .cell.locked{background:repeating-linear-gradient(45deg,#F6EBD8 0 5px,#EFDFC6 5px 10px)}
+.dir-b .t-toy .sbox{background:var(--toy-soft)}
+.dir-b .t-fac .sbox{background:var(--fac-soft)}
+.dir-b .t-cust .sbox{background:var(--cust-soft)}
+
+/* ============================================================
+   方向 C · 水彩绘本
+   令牌来源：phase2-设计系统候选.md · Starbucks 手作遗产 + 编辑排版
+   ============================================================ */
+.col.dir-c{
+  --surface:#FBF4E6;--surface-2:#F1EDE2;--cell:#FAF7EE;--grid-line:#E4DCCC;
+  --ink:#4F4235;--ink-2:#97836D;--ink-3:#BFB3A0;
+  --toy:#D3A0A2;--toy-d:#B88284;--toy-l:#E7CBCB;--toy-soft:#F4E7E7;
+  --care:#9CB380;--care-d:#7F9765;--care-l:#C2D3B3;--care-soft:#EBF0E4;
+  --food:#E5C07B;--food-d:#C7A25E;--food-l:#F2DDB4;--food-soft:#F8F0DD;
+  --fac:#C87A5A;--fac-d:#9E6242;--fac-l:#DDA98D;--fac-soft:#F6E6DB;
+  --cust:#D9A05B;--cust-d:#B98342;--cust-l:#EAC595;--cust-soft:#F6EBD8;
+  --gold:#C9A24B;--gold-d:#A8842F;--gold-l:#E4CE96;
+  --gem:#1E2A38;--gem-d:#131D29;--gem-l:#46586C;
+  --energy:#9DBBD4;--energy-d:#7A9CB6;--energy-l:#C6DBE9;
+  --ok:#6FBF73;--sel:#3A6EA5;--bag:#6FC0E8;--web:#C99A3F;--swap:#F2A03D;--sac:#9B6BD6;
+  --warn:#C9603F;
+  --emit:#9E6242;
+  --cta:#4A463E;--cta-ink:#FBF4E6;--cta-shadow:0 3px 8px rgba(79,66,53,.22);
+  --r-board:12px;--r-cell:8px;--r-item:6px;--r-card:10px;
+  --tile-shadow:0 0 0 3px #FFFFFF,0 0 0 4px rgba(79,66,53,.16),0 3px 8px rgba(199,122,90,.14);
+  --ln-op:1;--lite-op:.72;--shd-op:.55;
+  --paper:#FFFFFF;--ic:#4A463E;--ic-d:#3A332C;
+  --font:"Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;
+  --font-disp:"Kaiti SC","STKaiti","KaiTi",serif;
+}
+.dir-c .screen{font-family:var(--font);background:var(--surface);color:var(--ink)}
+.dir-c .chip,.dir-c .tbtn,.dir-c .infobar .hint,.dir-c .ibtn{box-shadow:0 0 0 3px #FFFFFF,0 0 0 4px rgba(79,66,53,.14)}
+.dir-c .num{font-family:var(--font-disp)}
+.dir-c .bar i{background:var(--energy)}
+.dir-c .board{box-shadow:0 0 0 3px #FFFFFF,0 0 0 4px rgba(79,66,53,.14),inset 0 0 0 1px var(--grid-line)}
+.dir-c .cell{background:var(--cell);box-shadow:0 0 0 2px #FFFFFF,0 0 0 3px rgba(79,66,53,.10)}
+.dir-c .cell.locked{background:repeating-linear-gradient(45deg,#EFE9DA 0 5px,#E6DDC8 5px 10px)}
+.dir-c .t-toy .sbox{background:var(--toy-soft)}
+.dir-c .t-fac .sbox{background:var(--fac-soft)}
+.dir-c .t-cust .sbox{background:var(--cust-soft)}
+/* C 的水彩近似：干净 SVG + 边缘位移滤镜 + 纸纹颗粒（真正的晕染走预渲染 webp 路线） */
+.dir-c .samp .sbox{background-image:radial-gradient(rgba(79,66,53,.055) .9px,transparent .9px);background-size:7px 7px}
+.dir-c .samp .sbox .spr{filter:url(#wc-wash)}
+.dir-c .samp .sbox{border:1.5px solid rgba(185,138,94,.35)}
+
+/* ---------- 各方向的字体板作用域：.spec 在 .phone 之外，必须显式补作用域 ---------- */
+.dir-a .spec .t-num,.dir-a .spec .t-title,.dir-a .spec .t-body{font-family:var(--font)}
+.dir-b .spec .t-num,.dir-b .spec .t-title,.dir-b .spec .t-body{font-family:var(--font)}
+.dir-c .spec .t-num,.dir-c .spec .t-title{font-family:var(--font-disp)}
+.dir-c .spec .t-body{font-family:var(--font)}
+</style>
+
+<!-- ============ SVG 符号库：几何只画一遍，三方向靠 CSS 变量换色换描边 ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<!-- 水彩晕染近似：边缘位移 + 纸纹（C 方向试样专用；正式路线为预渲染 webp） -->
+<filter id="wc-wash" x="-10%" y="-10%" width="120%" height="120%">
+  <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="7" result="n"/>
+  <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6"/>
+</filter>
+<!-- 毛线球（玩具链 Lv1） -->
+<symbol id="s-yarn" viewBox="0 0 48 48">
+  <circle cx="24" cy="26" r="13.5" style="fill:var(--toy-d);opacity:var(--shd-op,.55)"/>
+  <circle cx="24" cy="24" r="13.5" style="fill:var(--toy)"/>
+  <path d="M14.5 20.5c6 3 13.5 3 19-1.5M13 26.5c6.5 3.5 15.5 3 21-2M16.5 32.5c5 2.5 11 2 15-1.8" style="fill:none;stroke:var(--toy-d);stroke-width:1.9;stroke-linecap:round"/>
+  <ellipse cx="18.6" cy="17.8" rx="4.6" ry="2.9" transform="rotate(-24 18.6 17.8)" style="fill:var(--toy-l);opacity:var(--lite-op,.9)"/>
+  <path d="M31 35.5c2.2 2 5 2.4 7 1.2" style="fill:none;stroke:var(--toy-d);stroke-width:1.9;stroke-linecap:round"/>
+  <circle cx="24" cy="24" r="13.5" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 逗猫棒（玩具链 Lv2） -->
+<symbol id="s-wand" viewBox="0 0 48 48">
+  <path d="M13 41L31 18" style="stroke:var(--toy-d);stroke-width:3.4;stroke-linecap:round"/>
+  <path d="M13 41L31 18" style="stroke:var(--toy-l);stroke-width:1.2;stroke-linecap:round;opacity:var(--lite-op,.9)"/>
+  <path d="M33 16c3-5 9-7 12-4 1.5 2 .5 5-2 6-3.5 1.5-8 .5-10-2z" style="fill:var(--toy)"/>
+  <path d="M33 16c3-5 9-7 12-4" style="fill:none;stroke:var(--toy-d);stroke-width:1.6;stroke-linecap:round"/>
+  <circle cx="29.5" cy="21" r="2.6" style="fill:var(--toy-l)"/>
+  <path d="M33 16c3-5 9-7 12-4 1.5 2 .5 5-2 6-3.5 1.5-8 .5-10-2z" style="fill:none;stroke:var(--ink);stroke-width:1.4;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 铃铛球（玩具链 Lv3 · 中段发射器） -->
+<symbol id="s-bell" viewBox="0 0 48 48">
+  <circle cx="24" cy="27" r="13" style="fill:var(--toy-d);opacity:var(--shd-op,.55)"/>
+  <circle cx="24" cy="24" r="13" style="fill:var(--toy)"/>
+  <path d="M24 11.5v25M13.5 18.5c3 2 18 2 21 0" style="fill:none;stroke:var(--toy-d);stroke-width:2;stroke-linecap:round"/>
+  <rect x="21.6" y="34" width="4.8" height="5" rx="1.6" style="fill:var(--toy-d)"/>
+  <circle cx="24" cy="41" r="1.8" style="fill:var(--toy-d)"/>
+  <ellipse cx="19" cy="18" rx="4.4" ry="2.8" transform="rotate(-24 19 18)" style="fill:var(--toy-l);opacity:var(--lite-op,.9)"/>
+  <circle cx="24" cy="24" r="13" style="fill:none;stroke:var(--ink);stroke-width:1.6;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 梳毛刷（护理链 Lv1） -->
+<symbol id="s-brush" viewBox="0 0 48 48">
+  <rect x="19" y="6" width="10" height="16" rx="4.5" style="fill:var(--care-d)"/>
+  <rect x="14" y="21" width="20" height="14" rx="5" style="fill:var(--care-d);opacity:var(--shd-op,.55)"/>
+  <rect x="14" y="20" width="20" height="14" rx="5" style="fill:var(--care)"/>
+  <path d="M17 34v6M22 34v7M27 34v7M31 34v6" style="stroke:var(--care-d);stroke-width:2.2;stroke-linecap:round"/>
+  <ellipse cx="19" cy="23.5" rx="4" ry="2.4" transform="rotate(-18 19 23.5)" style="fill:var(--care-l);opacity:var(--lite-op,.9)"/>
+  <rect x="19" y="6" width="10" height="16" rx="4.5" style="fill:none;stroke:var(--ink);stroke-width:1.4;stroke-opacity:var(--ln-op,0)"/>
+  <rect x="14" y="20" width="20" height="14" rx="5" style="fill:none;stroke:var(--ink);stroke-width:1.4;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 洗澡球（护理链 Lv3 · 中段发射器） -->
+<symbol id="s-bath" viewBox="0 0 48 48">
+  <circle cx="24" cy="27" r="12" style="fill:var(--care-d);opacity:var(--shd-op,.55)"/>
+  <circle cx="24" cy="24" r="12" style="fill:var(--care)"/>
+  <circle cx="18.5" cy="19" r="2.6" style="fill:var(--care-l)"/>
+  <circle cx="29" cy="17.5" r="1.8" style="fill:var(--care-l)"/>
+  <path d="M24 12c0-2 2-2.6 2-4.2M30 13.5c.8-1.8 2.8-2 2.8-3.8M17.5 13.5c-.8-1.8-2.8-2-2.8-3.8" style="fill:none;stroke:var(--care-d);stroke-width:1.8;stroke-linecap:round"/>
+  <ellipse cx="19.5" cy="20" rx="4" ry="2.4" transform="rotate(-24 19.5 20)" style="fill:var(--care-l);opacity:var(--lite-op,.9)"/>
+  <circle cx="24" cy="24" r="12" style="fill:none;stroke:var(--ink);stroke-width:1.6;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 猫罐头（食物链 Lv1） -->
+<symbol id="s-can" viewBox="0 0 48 48">
+  <rect x="14" y="15" width="20" height="23" rx="4" style="fill:var(--food-d)"/>
+  <rect x="14" y="13" width="20" height="23" rx="4" style="fill:var(--food)"/>
+  <ellipse cx="24" cy="13.5" rx="10" ry="3" style="fill:var(--food-l)"/>
+  <ellipse cx="24" cy="27" rx="6" ry="4" style="fill:var(--food-l)"/>
+  <path d="M21 27c1.5-1.8 4.5-1.8 6 0" style="fill:none;stroke:var(--food-d);stroke-width:1.5;stroke-linecap:round"/>
+  <rect x="14" y="13" width="20" height="23" rx="4" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 鲜鱼排（食物链 Lv2） -->
+<symbol id="s-fish" viewBox="0 0 48 48">
+  <ellipse cx="24" cy="26" rx="12" ry="7.5" style="fill:var(--food-d);opacity:var(--shd-op,.55)"/>
+  <ellipse cx="24" cy="24" rx="12" ry="7.5" style="fill:var(--food)"/>
+  <path d="M35 24l7-5v10z" style="fill:var(--food-d)"/>
+  <circle cx="15" cy="22.5" r="1.5" style="fill:var(--ink)"/>
+  <path d="M19 24c3-1.8 8-1.8 11 0" style="fill:none;stroke:var(--food-d);stroke-width:1.6;stroke-linecap:round"/>
+  <ellipse cx="20" cy="20.5" rx="4" ry="2" transform="rotate(-16 20 20.5)" style="fill:var(--food-l);opacity:var(--lite-op,.9)"/>
+  <ellipse cx="24" cy="24" rx="12" ry="7.5" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 玩具架（设施链 · 发射器） -->
+<symbol id="s-rack" viewBox="0 0 48 48">
+  <rect x="8" y="11" width="32" height="28" rx="3" style="fill:var(--fac-d);opacity:var(--shd-op,.55)"/>
+  <rect x="9.5" y="12.5" width="29" height="25" rx="2.5" style="fill:var(--fac)"/>
+  <rect x="9.5" y="23" width="29" height="3" style="fill:var(--fac-d)"/>
+  <circle cx="16" cy="30" r="3.4" style="fill:var(--toy)"/>
+  <rect x="22" y="27.5" width="9" height="5" rx="2" style="fill:var(--care)"/>
+  <circle cx="18" cy="17" r="3.2" style="fill:var(--food)"/>
+  <path d="M27 20l4-4 4 4z" style="fill:var(--gem)"/>
+  <ellipse cx="15" cy="16" rx="5" ry="2.4" transform="rotate(-20 15 16)" style="fill:var(--fac-l);opacity:var(--lite-op,.9)"/>
+  <rect x="8" y="11" width="32" height="28" rx="3" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 玩具箱（设施链 · 发射器） -->
+<symbol id="s-box" viewBox="0 0 48 48">
+  <rect x="9" y="19" width="30" height="20" rx="3.5" style="fill:var(--fac-d);opacity:var(--shd-op,.55)"/>
+  <rect x="10.5" y="20.5" width="27" height="17" rx="3" style="fill:var(--fac)"/>
+  <path d="M9 22c4-6 26-6 30 0" style="fill:var(--fac-l)"/>
+  <circle cx="24" cy="27" r="2.6" style="fill:var(--fac-l)"/>
+  <path d="M17 19c0-4 3-6 7-6s7 2 7 6" style="fill:none;stroke:var(--fac-d);stroke-width:2"/>
+  <circle cx="19" cy="14" r="2.2" style="fill:var(--toy)"/>
+  <circle cx="29" cy="13.5" r="2" style="fill:var(--care)"/>
+  <ellipse cx="16" cy="25" rx="3.6" ry="2" transform="rotate(-14 16 25)" style="fill:var(--fac-l);opacity:var(--lite-op,.9)"/>
+  <path d="M9 22c4-6 26-6 30 0" style="fill:none;stroke:var(--ink);stroke-width:1.3;stroke-opacity:var(--ln-op,0)"/>
+  <rect x="9" y="19" width="30" height="20" rx="3.5" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 猫城堡（玩具链 Lv8 · 母体） -->
+<symbol id="s-fort" viewBox="0 0 48 48">
+  <rect x="9" y="19" width="30" height="21" rx="2" style="fill:var(--toy-d);opacity:var(--shd-op,.55)"/>
+  <rect x="9" y="17" width="30" height="21" rx="2" style="fill:var(--toy)"/>
+  <rect x="13" y="10" width="6" height="9" rx="1.5" style="fill:var(--toy)"/>
+  <rect x="29" y="10" width="6" height="9" rx="1.5" style="fill:var(--toy)"/>
+  <path d="M13 10l1.5-4 1.5 4zM29 10l1.5-4 1.5 4z" style="fill:var(--toy-d)"/>
+  <path d="M24 4v5" style="stroke:var(--ink-2);stroke-width:1.4"/>
+  <path d="M24 4.5l5 2-5 2z" style="fill:var(--food)"/>
+  <rect x="21.2" y="27" width="5.6" height="11" rx="2.6" style="fill:var(--toy-l)"/>
+  <circle cx="16" cy="22" r="1.6" style="fill:var(--toy-l)"/>
+  <circle cx="32" cy="22" r="1.6" style="fill:var(--toy-l)"/>
+  <ellipse cx="15" cy="20" rx="3.4" ry="2" transform="rotate(-18 15 20)" style="fill:var(--toy-l);opacity:var(--lite-op,.9)"/>
+  <rect x="9" y="17" width="30" height="21" rx="2" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- 柯基（顾客） -->
+<symbol id="s-corgi" viewBox="0 0 48 48">
+  <path d="M11 20L10 11l9 5z" style="fill:var(--cust-d)"/>
+  <path d="M37 20l1-9-9 5z" style="fill:var(--cust-d)"/>
+  <circle cx="24" cy="28" r="14" style="fill:var(--cust-d);opacity:var(--shd-op,.55)"/>
+  <circle cx="24" cy="26" r="14" style="fill:var(--cust)"/>
+  <path d="M24 20c-5 0-8.4 3.6-8.4 8 0 0 3.6-2.6 8.4-2.6s8.4 2.6 8.4 2.6c0-4.4-3.4-8-8.4-8z" style="fill:#FFF7EA"/>
+  <circle cx="18.5" cy="25" r="2.2" style="fill:var(--ink)"/>
+  <circle cx="29.5" cy="25" r="2.2" style="fill:var(--ink)"/>
+  <circle cx="17.8" cy="24.3" r=".8" style="fill:#fff"/>
+  <circle cx="28.8" cy="24.3" r=".8" style="fill:#fff"/>
+  <path d="M24 29l-1.8 1.8h3.6z" style="fill:var(--ink)"/>
+  <path d="M24 31.4c-1.2 1.4-3 1.4-3.8.2M24 31.4c1.2 1.4 3 1.4 3.8.2" style="fill:none;stroke:var(--ink);stroke-width:1.3;stroke-linecap:round"/>
+  <ellipse cx="18" cy="19.5" rx="4.6" ry="2.8" transform="rotate(-22 18 19.5)" style="fill:var(--cust-l);opacity:var(--lite-op,.9)"/>
+  <circle cx="24" cy="26" r="14" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-opacity:var(--ln-op,0)"/>
+</symbol>
+<!-- ============ 功能图标（24 视图） ============ -->
+<symbol id="i-coin" viewBox="0 0 24 24">
+  <circle cx="12" cy="12.6" r="8.6" style="fill:var(--gold-d)"/>
+  <circle cx="12" cy="12" r="8.6" style="fill:var(--gold)"/>
+  <circle cx="12" cy="12" r="5.8" style="fill:none;stroke:var(--gold-d);stroke-width:1.1;opacity:.7"/>
+  <g style="fill:var(--gold-d)">
+    <ellipse cx="12" cy="13.8" rx="2.5" ry="2.1"/>
+    <circle cx="7.6" cy="10.6" r="1.15"/><circle cx="10.2" cy="9.2" r="1.15"/><circle cx="13.8" cy="9.2" r="1.15"/><circle cx="16.4" cy="10.6" r="1.15"/>
+  </g>
+  <ellipse cx="9" cy="8.6" rx="2.4" ry="1.4" transform="rotate(-24 9 8.6)" style="fill:var(--gold-l);opacity:var(--lite-op,.9)"/>
+</symbol>
+<symbol id="i-gem" viewBox="0 0 24 24">
+  <path d="M7.2 4h9.6l4 5.4L12 20.4 3.2 9.4z" style="fill:var(--gem-d)"/>
+  <path d="M7.2 4h9.6l4 5.4H3.2z" style="fill:var(--gem)"/>
+  <path d="M7.2 4l2.6 5.4M16.8 4l-2.6 5.4M3.2 9.4h17.6M12 9.4L9 20.4M12 9.4l3 11" style="fill:none;stroke:var(--gem-d);stroke-width:.9;opacity:.55"/>
+  <ellipse cx="8.6" cy="6.8" rx="1.9" ry="1.1" transform="rotate(-24 8.6 6.8)" style="fill:var(--gem-l);opacity:var(--lite-op,.9)"/>
+</symbol>
+<symbol id="i-energy" viewBox="0 0 24 24">
+  <path d="M13.4 2.6L5.2 13.6h5l-1.2 7.8 9.2-12.4h-5.2z" style="fill:var(--energy)"/>
+  <path d="M13.4 2.6L5.2 13.6h5l-1.2 7.8 9.2-12.4h-5.2z" style="fill:none;stroke:var(--energy-d);stroke-width:1.2;stroke-linejoin:round;opacity:var(--shd-op,.6)"/>
+  <path d="M12.6 4.6L7 12.6h3.4l-.8 5.2" style="fill:none;stroke:var(--energy-l);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;opacity:var(--lite-op,.9)"/>
+</symbol>
+<symbol id="i-star" viewBox="0 0 24 24">
+  <path d="M12 2.8l2.8 5.9 6.4.9-4.7 4.5 1.2 6.4L12 17.3l-5.7 3.2 1.2-6.4-4.7-4.5 6.4-.9z" style="fill:var(--gold)"/>
+  <path d="M12 2.8l2.8 5.9 6.4.9-4.7 4.5 1.2 6.4L12 17.3z" style="fill:var(--gold-l);opacity:var(--lite-op,.55)"/>
+  <path d="M12 2.8l2.8 5.9 6.4.9-4.7 4.5 1.2 6.4L12 17.3l-5.7 3.2 1.2-6.4-4.7-4.5 6.4-.9z" style="fill:none;stroke:var(--ink);stroke-width:1.2;stroke-opacity:var(--ln-op,0);stroke-linejoin:round"/>
+</symbol>
+<symbol id="i-order" viewBox="0 0 24 24">
+  <rect x="5" y="4.5" width="14" height="16.5" rx="2.4" style="fill:var(--ink-2)"/>
+  <rect x="7" y="7" width="10" height="11.5" rx="1.4" style="fill:var(--surface)"/>
+  <rect x="9.4" y="2.6" width="5.2" height="3.6" rx="1.5" style="fill:var(--ink-2)"/>
+  <path d="M9.4 11h5.2M9.4 14h5.2M9.4 16.6h3" style="fill:none;stroke:var(--ink-3);stroke-width:1.5;stroke-linecap:round"/>
+</symbol>
+<symbol id="i-shop" viewBox="0 0 24 24">
+  <path d="M4.6 8.2h14.8l-1.1 11.6a1.7 1.7 0 01-1.7 1.5H7.4a1.7 1.7 0 01-1.7-1.5z" style="fill:var(--ic)"/>
+  <path d="M8.6 10.6V7.4a3.4 3.4 0 016.8 0v3.2" style="fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round"/>
+  <ellipse cx="9" cy="12" rx="1.5" ry="2.8" style="fill:var(--fac-l);opacity:var(--lite-op,.8)"/>
+</symbol>
+<symbol id="i-bag" viewBox="0 0 24 24">
+  <path d="M8.2 9A3.8 3.8 0 0115.8 9v.6h.9A2.6 2.6 0 0119.3 12.2v6a2.6 2.6 0 01-2.6 2.6H7.3A2.6 2.6 0 014.7 18.2v-6A2.6 2.6 0 017.3 9.6h.9z" style="fill:var(--ic)"/>
+  <path d="M8.2 9A3.8 3.8 0 0115.8 9" style="fill:none;stroke:var(--ink);stroke-width:1.7"/>
+  <rect x="9.2" y="13" width="5.6" height="4.6" rx="1.8" style="fill:var(--ic-d)"/>
+  <ellipse cx="8.4" cy="12.4" rx="1.3" ry="2.4" style="fill:var(--fac-l);opacity:var(--lite-op,.8)"/>
+</symbol>
+<symbol id="i-gear" viewBox="0 0 24 24">
+  <path d="M4 7h16M4 12h16M4 17h16" style="stroke:var(--ink-2);stroke-width:2.2;stroke-linecap:round"/>
+  <circle cx="9" cy="7" r="2.6" style="fill:var(--surface);stroke:var(--ink-2);stroke-width:2"/>
+  <circle cx="15" cy="12" r="2.6" style="fill:var(--surface);stroke:var(--ink-2);stroke-width:2"/>
+  <circle cx="7" cy="17" r="2.6" style="fill:var(--surface);stroke:var(--ink-2);stroke-width:2"/>
+</symbol>
+<symbol id="i-back" viewBox="0 0 24 24">
+  <path d="M14.6 4.5L7 12l7.6 7.5" style="fill:none;stroke:var(--ink-2);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"/>
+</symbol>
+<symbol id="i-lock" viewBox="0 0 24 24">
+  <rect x="5" y="10.4" width="14" height="9.8" rx="2.6" style="fill:var(--ink-3)"/>
+  <path d="M8.1 10.2V7.6a3.9 3.9 0 017.8 0v2.6" style="fill:none;stroke:var(--ink-3);stroke-width:2.1"/>
+  <circle cx="12" cy="15.2" r="1.7" style="fill:var(--surface)"/>
+</symbol>
+<symbol id="i-web" viewBox="0 0 24 24">
+  <g style="fill:none;stroke:var(--web);stroke-linecap:round">
+    <path d="M12 3v18M3.4 8h17.2M5.2 19.2L12 3l6.8 16.2" stroke-width="1.4"/>
+    <path d="M7 5.6c3.6 5.6 7.6 8.6 11.2 9.6M17 5.6c-3.6 5.6-7.6 8.6-11.2 9.6" stroke-width="1.1"/>
+  </g>
+</symbol>
+</defs>
+</svg>
+<div class="wrap">
+
+<header class="doc-hd">
+  <h1>爪爪乐园 · 整体 UI 重设计<span class="tag">三方向对比轮 · Phase 3 样张</span></h1>
+  <p class="sub">用户诉求：「现在的 ui 贴图都很丑」→ 框架 + 84 张贴图整体焕新。设计系统专家彩格调从 71 套系统中提取 DNA，定制三套候选：<b>A 软糯黏土</b>（首推）、<b>B 柔光糖果</b>、<b>C 水彩绘本</b>。三套共用同一套状态色语言与角标版式，切换方向不推翻布局与交互规格。</p>
+  <div class="howto">
+    <div class="step"><b>① 先扫整体</b>三个手机框是同一局中期棋盘的同一构图，唯一变量是色/形/质感。第一眼喜欢哪个，记下来。</div>
+    <div class="step"><b>② 再比四块板</b>每框下方有色板 / 字体 / 贴图试样 / 状态语言四块专项，细节功夫在这里见真章。</div>
+    <div class="step"><b>③ 重点看贴图</b>「丑」的主诉在贴图。试样区有玩具链 Lv1→Lv3 的真实递进 + 发射器 + 顾客，这是新画风的上限。</div>
+    <div class="step"><b>④ 定方向</b>选一套 → 彩格调出完整 DESIGN.md 令牌 → 筑原型铺全套界面（8 类弹窗 + 乐园场景 + 84 贴图分级规格）。</div>
+  </div>
+  <table class="cmp">
+    <tr><th style="width:92px">维度</th><th>A · 软糯黏土 ★</th><th>B · 柔光糖果</th><th>C · 水彩绘本</th></tr>
+    <tr><td><b>一句话</b></td><td>刚烤好的太妃糖黏土，圆滚滚、暖烘烘、带毛边柔光</td><td>干净糖果色 + 统一光源三阶体积光，利落精致</td><td>水彩晕染 + 手绘线条的绘本页，耐看有艺术感</td></tr>
+    <tr><td><b>DNA</b></td><td>Airbnb 圆角形状 + Miro 俏皮点缀</td><td>Apple 材质分层 + Framer 状态层</td><td>Starbucks 手作遗产 + 编辑排版温度</td></tr>
+    <tr><td><b>底色</b></td><td>奶油 #FFF6EA / 棋盘格 #F8E9D5</td><td>奶橙 #FFFBF4 / 棋盘格 #FFF1DE</td><td>奶白纸 #FBF4E6 / 卡面 #FFFDF7</td></tr>
+    <tr><td><b>主色</b></td><td>焦糖 #A85F27（按钮）/ 亮焦糖 #E69B62</td><td>珊瑚 #D2592A（按钮）/ 蜜桃 #FF9570</td><td>陶土 #C87A5A / 深 #9E6242</td></tr>
+    <tr><td><b>质感</b></td><td>黏土高光 + 绒软投影，无硬边</td><td>三阶体积光 + rim light + AO 椭圆</td><td>湿边水彩 + 墨线 + 纸纹（晕染须预渲染）</td></tr>
+    <tr><td><b>圆角</b></td><td>面板 22 / 棋盘格 12 / 角标全圆牌</td><td>面板 16 / 棋盘格 12 / 按钮胶囊</td><td>微圆角 12 + 3px 白衬纸边</td></tr>
+    <tr><td><b>字体</b></td><td>无衬线 · HUD 数字 900</td><td>无衬线（同 A 字族）· 数字同尺寸，差异在玻璃层与圆角</td><td>标题楷体 / 正文衬线（安卓需内置字体子集，落地有风险）</td></tr>
+    <tr><td><b>风险</b></td><td>低（flat 图形友好，中低端机友好）</td><td>低（性能最优，需统一光源规范）</td><td>高（晕染滤镜性能、工时 +35%、衬线字体落地不可控）</td></tr>
+  </table>
+</header>
+
+<div class="row">
+
+<!-- ==================== 方向 A · 软糯黏土 ==================== -->
+<section class="col dir-a">
+  <div class="col-hd">
+    <div class="nm">A · 软糯黏土 <span class="rec">彩格调首推</span></div>
+    <div class="dna">DNA：Airbnb 圆角形状 + Miro 俏皮点缀 ｜ 质感：黏土 / 毛绒 / 奶油 / 微磨砂</div>
+    <div class="kw"><i>软</i><i>圆</i><i>无硬边</i><i>绒软投影</i><i>治愈俏皮</i></div>
+  </div>
+  <div class="phone">
+    <div class="screen">
+      <div class="hud">
+        <div class="hrow">
+          <div class="chip"><svg class="ic"><use href="#i-coin"/></svg><b class="num">12,480</b></div>
+          <div class="chip energy">
+            <div class="erow"><svg class="ic"><use href="#i-energy"/></svg><b class="num">87</b><span class="den">/100</span></div>
+            <div class="bar"><i style="width:87%"></i></div>
+          </div>
+          <div class="chip"><svg class="ic"><use href="#i-gem"/></svg><b class="num">328</b></div>
+        </div>
+        <div class="hrow">
+          <div class="chip lvchip">
+            <div class="erow"><b class="num">Lv 24</b></div>
+            <div class="bar"><i style="width:62%"></i></div>
+          </div>
+          <div class="chip"><svg class="ic"><use href="#i-star"/></svg><b class="num">1,240</b></div>
+        </div>
+      </div>
+      <div class="tools">
+        <button class="tbtn"><svg class="ic"><use href="#i-order"/></svg><span>订单</span><i class="dot">2</i></button>
+        <button class="tbtn"><svg class="ic"><use href="#i-gear"/></svg><span>经营</span><i class="hotdot"></i></button>
+        <button class="tbtn"><svg class="ic"><use href="#i-bag"/></svg><span>背包</span></button>
+        <button class="tbtn go"><span>去乐园</span></button>
+      </div>
+      <div class="board"></div>
+      <div class="infobar">
+        <div class="hint">两个毛线球可以合成一个逗猫棒</div>
+        <button class="ibtn"><svg class="ic"><use href="#i-shop"/></svg><span>商店</span></button>
+        <button class="ibtn icon"><svg class="ic"><use href="#i-back"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="spec">
+    <div class="sp"><h4>色板</h4><div class="pals" data-pal="a"></div></div>
+    <div class="sp"><h4>字体</h4>
+      <div class="typo">
+        <div class="t-num">12,480</div>
+        <div class="t-title">爪爪乐园</div>
+        <div class="t-body">两个毛线球可以合成一个逗猫棒</div>
+      </div>
+    </div>
+    <div class="sp"><h4>贴图试样 · 玩具链 Lv1→Lv3 递进</h4><div class="samps" data-samp="a"></div></div>
+    <div class="sp"><h4>状态语言 <em>拖拽落点四色三套共享，选中色随主色微调</em></h4>
+      <div class="sts" data-st="a"></div>
+      <div class="bdgs"><span class="lv">1</span>等级牌·左下<span class="dur">6</span>耐久牌·右上<span class="res">8</span>储备牌·设施</div>
+    </div>
+  </div>
+</section>
+<!-- ==================== 方向 B · 柔光糖果 ==================== -->
+<section class="col dir-b">
+  <div class="col-hd">
+    <div class="nm">B · 柔光糖果</div>
+    <div class="dna">DNA：Apple 材质分层 + Framer 状态层 ｜ 质感：糖果 / 果冻 / 柔光 / 奶油漆面</div>
+    <div class="kw"><i>利落</i><i>三阶体积光</i><i>玻璃 HUD</i><i>果冻弹性</i><i>扫读性最强</i></div>
+  </div>
+  <div class="phone">
+    <div class="screen">
+      <div class="hud">
+        <div class="hrow">
+          <div class="chip"><svg class="ic"><use href="#i-coin"/></svg><b class="num">12,480</b></div>
+          <div class="chip energy">
+            <div class="erow"><svg class="ic"><use href="#i-energy"/></svg><b class="num">87</b><span class="den">/100</span></div>
+            <div class="bar"><i style="width:87%"></i></div>
+          </div>
+          <div class="chip"><svg class="ic"><use href="#i-gem"/></svg><b class="num">328</b></div>
+        </div>
+        <div class="hrow">
+          <div class="chip lvchip">
+            <div class="erow"><b class="num">Lv 24</b></div>
+            <div class="bar"><i style="width:62%"></i></div>
+          </div>
+          <div class="chip"><svg class="ic"><use href="#i-star"/></svg><b class="num">1,240</b></div>
+        </div>
+      </div>
+      <div class="tools">
+        <button class="tbtn"><svg class="ic"><use href="#i-order"/></svg><span>订单</span><i class="dot">2</i></button>
+        <button class="tbtn"><svg class="ic"><use href="#i-gear"/></svg><span>经营</span><i class="hotdot"></i></button>
+        <button class="tbtn"><svg class="ic"><use href="#i-bag"/></svg><span>背包</span></button>
+        <button class="tbtn go"><span>去乐园</span></button>
+      </div>
+      <div class="board"></div>
+      <div class="infobar">
+        <div class="hint">两个毛线球可以合成一个逗猫棒</div>
+        <button class="ibtn"><svg class="ic"><use href="#i-shop"/></svg><span>商店</span></button>
+        <button class="ibtn icon"><svg class="ic"><use href="#i-back"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="spec">
+    <div class="sp"><h4>色板</h4><div class="pals" data-pal="b"></div></div>
+    <div class="sp"><h4>字体</h4>
+      <div class="typo">
+        <div class="t-num">12,480</div>
+        <div class="t-title">爪爪乐园</div>
+        <div class="t-body">两个毛线球可以合成一个逗猫棒</div>
+      </div>
+    </div>
+    <div class="sp"><h4>贴图试样 · 玩具链 Lv1→Lv3 递进</h4><div class="samps" data-samp="b"></div></div>
+    <div class="sp"><h4>状态语言 <em>拖拽落点四色三套共享，选中色随主色微调</em></h4>
+      <div class="sts" data-st="b"></div>
+      <div class="bdgs"><span class="lv">1</span>等级牌·左下<span class="dur">6</span>耐久牌·右上<span class="res">8</span>储备牌·设施</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 方向 C · 水彩绘本 ==================== -->
+<section class="col dir-c">
+  <div class="col-hd">
+    <div class="nm">C · 水彩绘本</div>
+    <div class="dna">DNA：Starbucks 手作遗产 + 编辑排版温度 ｜ 质感：湿边水彩 / 炭铅轮廓 / 纸纹可见</div>
+    <div class="kw"><i>艺术感</i><i>耐看</i><i>低饱和</i><i>衬线标题</i><i>风险最高</i></div>
+    <div class="dna" style="margin-top:6px;color:#8A8880">试样为「干净 SVG + 位移滤镜 + 纸纹」的近似画法；真正的晕染质感走彩格调路线 1 的预渲染 webp，正式阶段出图。</div>
+  </div>
+  <div class="phone">
+    <div class="screen">
+      <div class="hud">
+        <div class="hrow">
+          <div class="chip"><svg class="ic"><use href="#i-coin"/></svg><b class="num">12,480</b></div>
+          <div class="chip energy">
+            <div class="erow"><svg class="ic"><use href="#i-energy"/></svg><b class="num">87</b><span class="den">/100</span></div>
+            <div class="bar"><i style="width:87%"></i></div>
+          </div>
+          <div class="chip"><svg class="ic"><use href="#i-gem"/></svg><b class="num">328</b></div>
+        </div>
+        <div class="hrow">
+          <div class="chip lvchip">
+            <div class="erow"><b class="num">Lv 24</b></div>
+            <div class="bar"><i style="width:62%"></i></div>
+          </div>
+          <div class="chip"><svg class="ic"><use href="#i-star"/></svg><b class="num">1,240</b></div>
+        </div>
+      </div>
+      <div class="tools">
+        <button class="tbtn"><svg class="ic"><use href="#i-order"/></svg><span>订单</span><i class="dot">2</i></button>
+        <button class="tbtn"><svg class="ic"><use href="#i-gear"/></svg><span>经营</span><i class="hotdot"></i></button>
+        <button class="tbtn"><svg class="ic"><use href="#i-bag"/></svg><span>背包</span></button>
+        <button class="tbtn go"><span>去乐园</span></button>
+      </div>
+      <div class="board"></div>
+      <div class="infobar">
+        <div class="hint">两个毛线球可以合成一个逗猫棒</div>
+        <button class="ibtn"><svg class="ic"><use href="#i-shop"/></svg><span>商店</span></button>
+        <button class="ibtn icon"><svg class="ic"><use href="#i-back"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="spec">
+    <div class="sp"><h4>色板</h4><div class="pals" data-pal="c"></div></div>
+    <div class="sp"><h4>字体</h4>
+      <div class="typo">
+        <div class="t-num">12,480</div>
+        <div class="t-title">爪爪乐园</div>
+        <div class="t-body">两个毛线球可以合成一个逗猫棒</div>
+      </div>
+    </div>
+    <div class="sp"><h4>贴图试样 · 玩具链 Lv1→Lv3 递进</h4><div class="samps" data-samp="c"></div></div>
+    <div class="sp"><h4>状态语言 <em>拖拽落点四色三套共享，选中色随主色微调</em></h4>
+      <div class="sts" data-st="c"></div>
+      <div class="bdgs"><span class="lv">1</span>等级牌·左下<span class="dur">6</span>耐久牌·右上<span class="res">8</span>储备牌·设施</div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /row -->
+
+<footer class="doc-ft">
+  <p><b>共享约定（选任何一套都不推翻）：</b>拖拽落点四色——可合成 #6FBF73 / 可挤出 #F2A03D / 可存背包 #6FC0E8 / 可献祭 #9B6BD6——三套完全一致（仅选中色随主色微调：A 深焦糖 / B 砖红 / C 群青）；角标三形态（左下等级 / 右上耐久 / 设施储备）版式一致；母体实线内描边、链中段发射器虚线内描边的状态语言一致。</p>
+  <p><b>棋盘内容说明：</b>样张为一局中期真实局面——毛线球/梳毛刷/猫罐头铺底，逗猫棒与鲜鱼排进阶，铃铛球与洗澡球是 Lv3 中段发射器（虚线描边 + 耐久 5），猫城堡是 Lv8 母体（实线描边 + 耐久 6），玩具架/玩具箱是设施（暖金内环 + 储备 8/12），另有蛛网障碍 ×2、锁定格 ×2、可合成提示 ×1。</p>
+  <p><b>下一步：</b>你从三套里定一套 → 彩格调产出完整 DESIGN.md 令牌（9 段结构）→ 筑原型铺全套界面与 84 贴图分级规格 → 严过审 5 维评审 → 交付。</p>
+  <p class="note">注：样张中 A 方向的第 5 主色按「陶橙与主色合并、点缀取樱花粉/黄油双色」处置——这是对彩格调方案中一处歧义的处理，已记录在案；如不喜欢可在选定方向后调整。</p>
+</footer>
+
+</div><!-- /wrap -->
+<script>
+(function(){
+/* ---------- 棋盘数据：一局中期真实局面（9 行 × 7 列） ---------- */
+var ROWS=[
+['yarn','yarn','brush','yarn','L','can','yarn'],
+['wand','brush','yarn','W','rack','yarn','brush'],
+['yarn','bath','brush','yarn','can','brush','wand'],
+['brush','can','yarn','box','brush','can','yarn'],
+['bell','fort','can','yarn','W','wand','brush'],
+['yarn','brush','brush','can','yarn','brush','yarn'],
+['wand','yarn','brush','fish','brush','can','brush'],
+['yarn','can','brush','yarn','L','brush','wand'],
+['brush','yarn','can','brush','yarn','yarn','brush']
+];
+var LV={yarn:1,brush:1,can:1,wand:2,fish:2,bell:3,bath:3,fort:8};
+var SPR={yarn:'s-yarn',wand:'s-wand',bell:'s-bell',brush:'s-brush',bath:'s-bath',can:'s-can',fish:'s-fish',rack:'s-rack',box:'s-box',fort:'s-fort'};
+var CH={yarn:'t-toy',wand:'t-toy',bell:'t-toy',fort:'t-toy',brush:'t-care',bath:'t-care',can:'t-food',fish:'t-food',rack:'t-fac',box:'t-fac'};
+var RES={rack:'8',box:'12'};
+var DUR={bell:'5',bath:'5',fort:'6'};
+function buildBoard(el){
+  ROWS.forEach(function(row,ri){
+    row.forEach(function(c,ci){
+      var d=document.createElement('div');
+      if(c==='L'){d.className='cell locked';d.innerHTML='<svg class="lic"><use href="#i-lock"/></svg>';}
+      else if(c==='W'){d.className='cell webbed';d.innerHTML='<svg class="wic"><use href="#i-web"/></svg><span class="wbadge">3</span>';}
+      else{
+        var emit=(c==='bell'||c==='bath'),top=(c==='fort'),fac=(c==='rack'||c==='box');
+        d.className='cell item '+CH[c];
+        if(top)d.className+=' gen';
+        if(emit)d.className+=' genmid';
+        if(fac)d.className+=' fac';
+        if(ri===0&&ci===0)d.className+=' ex';
+        var h='<div class="tile"><svg class="spr"><use href="#'+SPR[c]+'"/></svg>';
+        if(emit||top)h+='<span class="dur">'+DUR[c]+'</span>';
+        if(fac)h+='<span class="res">'+RES[c]+'</span>';
+        h+='</div>';
+        if(!fac)h+='<span class="lv">'+LV[c]+'</span>';
+        if(ri===0&&ci===0)h+='<span class="exb">!</span>';
+        d.innerHTML=h;
+      }
+      el.appendChild(d);
+    });
+  });
+}
+document.querySelectorAll('.board').forEach(buildBoard);
+
+/* ---------- 色板 chips ---------- */
+var PAL={
+a:[['主色·焦糖','--cta','#A85F27'],['图形·亮焦糖','--fac','#E69B62'],['辅色·鼠尾草','--care','#8DB580'],['底色·奶油','--surface','#FFF6EA'],['棋盘格','--surface-2','#F8E9D5'],['墨色·暖可可','--ink','#5C4A38'],['玩具链·樱花粉','--toy','#F2A2B8'],['金币·黄油','--gold','#F2B63C'],['钻石·天蓝','--gem','#6FC0E8'],['体力·珊瑚','--energy','#FF8095']],
+b:[['主色·蜜桃','--fac','#FF9570'],['按钮·深珊瑚','--cta','#D2592A'],['辅色·薄荷','--care','#4EC9AE'],['底色·奶橙','--surface','#FFFBF4'],['棋盘格','--surface-2','#FFF1DE'],['墨色·可可','--ink','#54473D'],['玩具链·草莓奶','--toy','#FF8FA3'],['金币','--gold','#FFC531'],['钻石·雾蓝','--gem','#54C6F0'],['体力','--energy','#FF6B8A']],
+c:[['按钮·石板灰','--cta','#4A463E'],['辅色·陶土','--fac','#C87A5A'],['辅色·鼠尾草','--care','#9CB380'],['纸底·奶白','--surface','#FBF4E6'],['墨色','--ink','#4F4235'],['玩具链·干玫瑰','--toy','#D3A0A2'],['金币·芥末黄','--gold','#C9A24B'],['钻石·墨黛蓝','--gem','#1E2A38'],['点缀·雾蓝','--sel','#3A6EA5'],['纸边白','--paper','#FFFFFF']]
+};
+document.querySelectorAll('[data-pal]').forEach(function(box){
+  var d=box.getAttribute('data-pal');
+  var cs=getComputedStyle(document.querySelector('.col.dir-'+d));
+  PAL[d].forEach(function(p){
+    var v=cs.getPropertyValue(p[1]).trim();
+    var grad=v.indexOf('gradient')>=0;
+    if(!v)v=p[2];
+    var el=document.createElement('div');el.className='pchip';
+    el.innerHTML='<span class="sw" style="background:'+v+'"></span><span class="nm">'+p[0]+'</span><span class="hx">'+(grad?p[2]:v)+'</span>';
+    box.appendChild(el);
+  });
+});
+
+/* ---------- 贴图试样 ---------- */
+var SAMP=[['s-yarn','毛线球','Lv1','t-toy'],['s-wand','逗猫棒','Lv2','t-toy'],['s-bell','铃铛球','Lv3 · 中段发射器','t-toy'],['s-fort','猫城堡','Lv8 · 母体','t-toy'],['s-rack','玩具架','设施 · 发射器','t-fac'],['s-corgi','柯基','顾客','t-cust']];
+document.querySelectorAll('[data-samp]').forEach(function(box){
+  SAMP.forEach(function(s){
+    var el=document.createElement('div');el.className='samp '+s[3];
+    el.innerHTML='<div class="sbox"><svg class="spr big"><use href="#'+s[0]+'"/></svg></div><b>'+s[1]+'</b><span>'+s[2]+'</span>';
+    box.appendChild(el);
+  });
+});
+
+/* ---------- 状态语言 ---------- */
+var ST=[['可合成','--ok'],['选中','--sel'],['可存背包','--bag'],['可献祭清网','--sac'],['可挤出换位','--swap']];
+document.querySelectorAll('[data-st]').forEach(function(box){
+  var d=box.getAttribute('data-st');
+  var cs=getComputedStyle(document.querySelector('.col.dir-'+d));
+  ST.forEach(function(s){
+    var v=cs.getPropertyValue(s[1]).trim()||'#999';
+    var el=document.createElement('div');el.className='stchip';
+    el.innerHTML='<span class="sw" style="background:'+v+'"></span>'+s[0];
+    box.appendChild(el);
+  });
+});
+})();
+</script>
+</body>
+</html>

@@ -18,3 +18,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 /.idea/
+
+# 本地验证用的临时浏览器 profile
+.tmp-edge/

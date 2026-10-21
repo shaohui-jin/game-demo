@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>爪爪乐园 · 主场景（园区外景）UI 交互样张</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--doc-bg:#EDEBE6;--doc-card:#fff;--doc-ink:#2A2A28;--doc-ink2:#6E6C66;--doc-line:#D9D6CF}
+body{background:var(--doc-bg);color:var(--doc-ink);font-family:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1560px;margin:0 auto;padding:26px 20px 64px}
+.doc-hd{background:var(--doc-card);border:1px solid var(--doc-line);border-radius:20px;padding:22px 26px;margin-bottom:20px}
+.doc-hd h1{font-size:21px;font-weight:900}
+.doc-hd h1 .tag{font-size:11px;font-weight:800;color:#7E6220;background:#F8F0DD;border-radius:99px;padding:3px 10px;vertical-align:3px;margin-left:10px}
+.doc-hd .sub{margin-top:8px;font-size:13px;line-height:1.75;color:var(--doc-ink2)}
+.row{display:flex;gap:22px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.col{width:480px}
+.col-hd{background:var(--doc-card);border:1px solid var(--doc-line);border-radius:14px;padding:12px 15px;margin-bottom:12px}
+.col-hd .nm{font-size:15px;font-weight:900}
+.col-hd .dna{font-size:11.5px;color:var(--doc-ink2);margin-top:3px;line-height:1.6}
+.phone{background:#17161A;border-radius:44px;padding:10px;box-shadow:0 16px 36px rgba(0,0,0,.2)}
+.screen{position:relative;width:458px;height:700px;border-radius:36px;overflow:hidden;background:#FBF4E6;display:flex;flex-direction:column;font-family:"Songti SC","STSong","Noto Serif CJK SC",serif;color:#4F4235}
+
+/* ===== 顶部 HUD ===== */
+.park-hud{display:flex;align-items:center;gap:8px;padding:12px 12px 8px;position:relative;z-index:5}
+.ph-btn{background:#FFFDF7;border:2px solid #FFFDF7;border-radius:11px;box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(79,66,53,.14),0 3px 8px rgba(199,122,90,.14);padding:7px 11px;font-size:11px;font-weight:800;color:#4F4235;font-family:"PingFang SC",sans-serif;cursor:pointer}
+.ph-stars{flex:1;text-align:center;font-family:"Kaiti SC","STKaiti","KaiTi",serif;font-size:19px;font-weight:800;color:#4F4235;letter-spacing:.5px}
+.ph-stars small{font-size:11px;font-family:"PingFang SC",sans-serif;color:#97836D;font-weight:600;margin-left:4px}
+.park-hud .lv{background:#FFFDF7;border:2px solid #FFFDF7;border-radius:11px;box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(79,66,53,.14);padding:6px 10px;font-size:11px;font-weight:800;font-family:"Kaiti SC","STKaiti",serif}
+
+/* ===== 场景 ===== */
+.scene{position:relative;flex:1;overflow:hidden}
+.scene svg{display:block;width:100%;height:100%}
+.scene .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 80% at 50% 40%,transparent 55%,rgba(120,90,60,.12) 100%)}
+.scene-hint{position:absolute;left:50%;bottom:38px;transform:translateX(-50%);background:rgba(255,253,247,.92);border:2px solid #FFFDF7;box-shadow:0 0 0 3px rgba(255,255,255,.6),0 3px 8px rgba(79,66,53,.12);border-radius:99px;padding:6px 14px;font-size:11px;color:#6E5A45;font-family:"PingFang SC",sans-serif;white-space:nowrap}
+.scene-hint b{color:#9E6242}
+
+/* 可购地块脉冲 */
+@keyframes plotPulse{0%,100%{opacity:0;transform:scale(.8)}50%{opacity:.55;transform:scale(1.15)}}
+.plot-ring{transform-box:fill-box;transform-origin:center;animation:plotPulse 2s ease-in-out infinite}
+/* 选中建筑光环 */
+@keyframes selRing{0%,100%{opacity:.5}50%{opacity:.85}}
+.sel-ring{animation:selRing 2.2s ease-in-out infinite}
+
+/* ===== 底部栏 ===== */
+.park-foot{display:flex;align-items:center;gap:7px;padding:10px 12px 14px;position:relative;z-index:5}
+.pf-main{flex:1;background:#4A463E;color:#FBF4E6;border:2px solid #FFFDF7;border-radius:11px;padding:11px;text-align:center;font-size:13px;font-weight:800;font-family:"PingFang SC",sans-serif;box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(79,66,53,.16),0 4px 10px rgba(79,66,53,.18);cursor:pointer}
+.pf-ico{background:#FFFDF7;border:2px solid #FFFDF7;border-radius:11px;box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(79,66,53,.14);padding:9px 11px;font-size:11px;font-weight:800;font-family:"PingFang SC",sans-serif;color:#4F4235;cursor:pointer;white-space:nowrap}
+.fest{position:absolute;right:12px;top:-26px;font-size:10.5px;color:#7E6220;background:#F8F0DD;border-radius:99px;padding:3px 9px;font-family:"PingFang SC",sans-serif;font-weight:700;border:1px solid #E8D9B8}
+
+/* ===== 建筑信息卡（底部抽屉） ===== */
+.sheet{position:absolute;left:10px;right:10px;bottom:10px;background:#FFFDF7;border:3px solid #FFFDF7;border-radius:16px;box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(79,66,53,.16),0 14px 30px rgba(79,66,53,.26);padding:14px 16px;z-index:6}
+.sheet .sh-head{display:flex;align-items:baseline;gap:8px}
+.sheet .sh-name{font-family:"Kaiti SC","STKaiti",serif;font-size:18px;font-weight:800;letter-spacing:.5px}
+.sheet .sh-lv{font-size:11px;font-weight:800;font-family:"PingFang SC",sans-serif;color:#9E6242;background:#F6E6DB;border-radius:99px;padding:2px 8px}
+.sheet .sh-chain{font-size:10.5px;color:#97836D;font-family:"PingFang SC",sans-serif;margin-left:auto}
+.sheet .sh-desc{font-size:11.5px;color:#6E5A45;line-height:1.6;margin-top:5px}
+.sheet .sh-out{display:flex;gap:6px;margin-top:8px}
+.sheet .out{display:flex;align-items:center;gap:4px;background:#F4E7E7;border-radius:8px;padding:4px 8px;font-size:10.5px;font-weight:700;font-family:"PingFang SC",sans-serif;color:#7E5254}
+.sheet .out svg{width:16px;height:16px}
+.sheet .sh-btns{display:flex;gap:7px;margin-top:11px}
+.sh-btn{flex:1;border:0;border-radius:9px;padding:10px 4px;font-size:12px;font-weight:800;font-family:"PingFang SC",sans-serif;cursor:pointer}
+.sh-btn.up{background:#F6E6DB;color:#7E4A2E;border:1.5px solid #DDA98D}
+.sh-btn.enter{background:#4A463E;color:#FBF4E6}
+.sh-btn.deco{background:#FFFDF7;color:#6E5A45;border:1.5px solid #E4DCCC}
+.sh-x{position:absolute;right:10px;top:10px;width:22px;height:22px;border-radius:50%;border:1.5px solid #E4DCCC;background:#FFFDF7;color:#97836D;font-size:11px;line-height:1;cursor:pointer}
+
+/* 购地确认卡 */
+.buy .sh-name{font-size:17px}
+.buy .cost-row{display:flex;align-items:center;justify-content:space-between;margin-top:9px;font-size:12px;font-family:"PingFang SC",sans-serif}
+.buy .cost-row b{font-family:"Kaiti SC","STKaiti",serif;font-size:17px}
+.buy .ok{background:#9E6242;color:#FBF4E6}
+.buy .no{background:#FFFDF7;color:#6E5A45;border:1.5px solid #E4DCCC}
+
+/* ===== 交互说明 ===== */
+.spec{background:var(--doc-card);border:1px solid var(--doc-line);border-radius:14px;padding:14px 16px;margin-top:12px}
+.spec h4{font-size:12px;font-weight:900;margin-bottom:8px}
+.spec ol{margin-left:16px;font-size:11.5px;line-height:1.9;color:#4A483F}
+.spec ol b{color:#2A2A28}
+.doc-ft{margin-top:22px;background:var(--doc-card);border:1px solid var(--doc-line);border-radius:14px;padding:16px 20px;font-size:12px;line-height:1.8;color:#4A483F}
+.doc-ft b{color:#2A2A28}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="doc-hd">
+  <h1>爪爪乐园 · 主场景（园区外景）UI 交互样张<span class="tag">方向 C 水彩绘本</span></h1>
+  <p class="sub">棋盘之外的那张「园区地图」：斜视角草地、已建成的设施建筑、待购的告示牌地块、装饰物。三态样张分别覆盖<b>总览 / 选中建筑 / 购地确认</b>，全部沿用 C 的纸底、衬纸边、炭铅描边与楷体数字。当前工程里的 <code>YardView.vue</code> 是 Canvas 画 emoji + 黄牌，本样张给出替代方案。</p>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <!-- 猫城堡（玩具链 · 玫瑰） -->
+  <symbol id="b-castle" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="86" rx="30" ry="7" fill="#8A6E5A" opacity=".18"/>
+    <rect x="22" y="46" width="56" height="38" rx="3" fill="#A87478" stroke="#B98A5E" stroke-width="1.6"/>
+    <rect x="18" y="38" width="18" height="46" rx="2" fill="#B88284" stroke="#B98A5E" stroke-width="1.4"/>
+    <rect x="64" y="38" width="18" height="46" rx="2" fill="#B88284" stroke="#B98A5E" stroke-width="1.4"/>
+    <path d="M18 38l9-12 9 12zM64 38l9-12 9 12z" fill="#9E6B6E" stroke="#B98A5E" stroke-width="1.3"/>
+    <path d="M50 26v12" stroke="#B98A5E" stroke-width="1.6"/>
+    <path d="M50 26l11 4-11 4z" fill="#E5C07B" stroke="#B98A5E" stroke-width="1"/>
+    <path d="M43 84V66a7 7 0 0114 0v18z" fill="#E7CBCB" stroke="#B98A5E" stroke-width="1.3"/>
+    <circle cx="27" cy="56" r="3" fill="#E7CBCB"/><circle cx="73" cy="56" r="3" fill="#E7CBCB"/>
+    <ellipse cx="30" cy="50" rx="7" ry="3" fill="#D3A0A2" opacity=".9"/>
+  </symbol>
+  <!-- 美容沙龙（护理链 · 鼠尾草） -->
+  <symbol id="b-salon" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="86" rx="28" ry="6.5" fill="#8A6E5A" opacity=".18"/>
+    <rect x="24" y="48" width="52" height="36" rx="3" fill="#C2D3B3" stroke="#B98A5E" stroke-width="1.6"/>
+    <path d="M20 48l10-14h40l10 14z" fill="#9CB380" stroke="#B98A5E" stroke-width="1.5"/>
+    <path d="M30 34v14M42 34v14M54 34v14M66 34v14" stroke="#FFFDF7" stroke-width="3.2" opacity=".8"/>
+    <rect x="44" y="62" width="12" height="22" rx="2" fill="#EBF0E4" stroke="#B98A5E" stroke-width="1.2"/>
+    <circle cx="50" cy="55" r="3.4" fill="#E5C07B" stroke="#B98A5E" stroke-width="1"/>
+    <ellipse cx="34" cy="42" rx="7" ry="2.6" fill="#DCE7CF" opacity=".95"/>
+  </symbol>
+  <!-- 猫食堂（食物链 · 麦金） -->
+  <symbol id="b-diner" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="86" rx="27" ry="6.5" fill="#8A6E5A" opacity=".18"/>
+    <rect x="26" y="50" width="48" height="34" rx="3" fill="#E5C07B" stroke="#B98A5E" stroke-width="1.6"/>
+    <path d="M22 50l6-12h44l6 12z" fill="#D9B36A" stroke="#B98A5E" stroke-width="1.4"/>
+    <rect x="42" y="64" width="16" height="20" rx="2" fill="#F8F0DD" stroke="#B98A5E" stroke-width="1.2"/>
+    <path d="M34 40c0-6 6-9 12-6" stroke="#B98A5E" stroke-width="1.4" fill="none"/>
+    <circle cx="50" cy="38" r="6" fill="#FFFDF7" stroke="#B98A5E" stroke-width="1.3"/>
+    <path d="M46 38h8" stroke="#C7A25E" stroke-width="1.6"/>
+    <ellipse cx="33" cy="56" rx="7" ry="2.6" fill="#F2DDB4" opacity=".95"/>
+  </symbol>
+  <!-- 猫诊所（医疗链 · 雾蓝） -->
+  <symbol id="b-clinic" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="86" rx="26" ry="6" fill="#8A6E5A" opacity=".18"/>
+    <rect x="28" y="50" width="44" height="34" rx="3" fill="#C6DBE9" stroke="#B98A5E" stroke-width="1.6"/>
+    <path d="M24 50l8-10h36l8 10z" fill="#9DBBD4" stroke="#B98A5E" stroke-width="1.4"/>
+    <rect x="44" y="62" width="12" height="22" rx="2" fill="#F7FBFC" stroke="#B98A5E" stroke-width="1.2"/>
+    <path d="M50 36v12M44 42h12" stroke="#C9603F" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="34" cy="56" rx="6" ry="2.4" fill="#DCEAF2" opacity=".95"/>
+  </symbol>
+  <!-- 告示牌（待购地块） -->
+  <symbol id="b-sign" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="86" rx="18" ry="4.5" fill="#8A6E5A" opacity=".18"/>
+    <rect x="47" y="48" width="6" height="38" rx="2" fill="#C9A87C" stroke="#B98A5E" stroke-width="1.3"/>
+    <rect x="28" y="30" width="44" height="26" rx="4" fill="#F8F0DD" stroke="#B98A5E" stroke-width="1.6"/>
+    <path d="M50 38a5 5 0 00-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 00-5-5z" fill="#D3A0A2" stroke="#B98A5E" stroke-width="1"/>
+    <circle cx="37" cy="36" r="1.6" fill="#C9A87C"/><circle cx="63" cy="36" r="1.6" fill="#C9A87C"/>
+  </symbol>
+  <!-- 树 -->
+  <symbol id="b-tree" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="88" rx="18" ry="4.5" fill="#8A6E5A" opacity=".16"/>
+    <rect x="46" y="60" width="8" height="26" rx="3" fill="#B98A5E"/>
+    <circle cx="50" cy="46" r="24" fill="#9CB380" stroke="#B98A5E" stroke-width="1.5"/>
+    <circle cx="36" cy="40" r="12" fill="#C2D3B3" opacity=".9"/>
+    <circle cx="60" cy="52" r="9" fill="#7F9765" opacity=".5"/>
+  </symbol>
+  <!-- 路灯 -->
+  <symbol id="b-lamp" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="88" rx="12" ry="3.5" fill="#8A6E5A" opacity=".16"/>
+    <rect x="47" y="40" width="6" height="46" rx="3" fill="#B98A5E"/>
+    <path d="M36 34h28l-4-10H40z" fill="#F8F0DD" stroke="#B98A5E" stroke-width="1.4"/>
+    <circle cx="50" cy="29" r="4" fill="#E5C07B"/>
+  </symbol>
+  <!-- 长椅 -->
+  <symbol id="b-bench" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="86" rx="20" ry="4" fill="#8A6E5A" opacity=".16"/>
+    <rect x="26" y="52" width="48" height="7" rx="3" fill="#C9A87C" stroke="#B98A5E" stroke-width="1.2"/>
+    <rect x="26" y="62" width="48" height="7" rx="3" fill="#C9A87C" stroke="#B98A5E" stroke-width="1.2"/>
+    <rect x="30" y="68" width="5" height="14" rx="2" fill="#B98A5E"/><rect x="65" y="68" width="5" height="14" rx="2" fill="#B98A5E"/>
+  </symbol>
+</defs></svg>
+
+<div class="row">
+
+<!-- ============ 态 1：园区总览 ============ -->
+<section class="col">
+  <div class="col-hd"><div class="nm">态 1 · 园区总览</div><div class="dna">进入游戏的第一屏。已建建筑可点、待购地块的告示牌带脉冲、底部是进入棋盘的唯一主入口。</div></div>
+  <div class="phone"><div class="screen">
+    <div class="park-hud">
+      <button class="ph-btn">存档</button>
+      <div class="ph-stars">⭐ 1,240<small>星星</small></div>
+      <div class="lv">Lv 24</div>
+      <button class="ph-btn">猫</button>
+    </div>
+    <div class="scene" data-scene="overview">
+      <div class="vignette"></div>
+      <div class="scene-hint">拖动平移 · 点建筑进店 · 点<b>告示牌</b>买地</div>
+    </div>
+    <div class="park-foot" style="position:relative">
+      <span class="fest">🌸 樱花节 · 还剩 3 天</span>
+      <button class="pf-main">进入棋盘</button>
+      <button class="pf-ico">图鉴</button>
+      <button class="pf-ico">活动</button>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ 态 2：选中建筑 ============ -->
+<section class="col">
+  <div class="col-hd"><div class="nm">态 2 · 选中建筑</div><div class="dna">点已建建筑 → 底部滑出信息卡：等级 / 所属链 / 当前产出 / 升级·进入·装饰。轻点空白处或 × 收起。</div></div>
+  <div class="phone"><div class="screen">
+    <div class="park-hud">
+      <button class="ph-btn">存档</button>
+      <div class="ph-stars">⭐ 1,240<small>星星</small></div>
+      <div class="lv">Lv 24</div>
+      <button class="ph-btn">猫</button>
+    </div>
+    <div class="scene" data-scene="selected">
+      <div class="vignette"></div>
+    </div>
+    <div class="sheet">
+      <button class="sh-x">✕</button>
+      <div class="sh-head">
+        <span class="sh-name">猫城堡</span>
+        <span class="sh-lv">Lv 3</span>
+        <span class="sh-chain">玩具链 · 母体</span>
+      </div>
+      <div class="sh-desc">城堡里囤着护理物料，点一下吐一件。储备 6 次，用完会变成「伴手礼」。</div>
+      <div class="sh-out">
+        <span class="out"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="13" fill="#D3A0A2" stroke="#B98A5E" stroke-width="1.4"/><path d="M14 19.5c6 3.4 14 3 20-1.6M12.5 25.5c6.6 3.8 16 3.2 21.5-2" stroke="#C9A2A4" stroke-width="1.6" stroke-linecap="round"/></svg>梳毛刷 ×1</span>
+        <span class="out"><svg viewBox="0 0 48 48"><rect x="19" y="8" width="10" height="15" rx="4" fill="#7F9765"/><rect x="14" y="21" width="20" height="13" rx="5" fill="#9CB380" stroke="#B98A5E" stroke-width="1.3"/></svg>指甲剪 ×1</span>
+        <span class="out"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="12" fill="#B4C9A2" stroke="#B98A5E" stroke-width="1.3"/><circle cx="19" cy="20" r="2.4" fill="#EBF0E4"/></svg>洗澡球 ×8%</span>
+      </div>
+      <div class="sh-btns">
+        <button class="sh-btn up">升级 ⭐12</button>
+        <button class="sh-btn enter">进入</button>
+        <button class="sh-btn deco">装饰</button>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ 态 3：购地确认 ============ -->
+<section class="col">
+  <div class="col-hd"><div class="nm">态 3 · 购地确认</div><div class="dna">点告示牌 → 确认卡：地价、现有星星、买下后解锁哪条链。星星只从订单产出，是第四种货币，与主经济隔离。</div></div>
+  <div class="phone"><div class="screen">
+    <div class="park-hud">
+      <button class="ph-btn">存档</button>
+      <div class="ph-stars">⭐ 1,240<small>星星</small></div>
+      <div class="lv">Lv 24</div>
+      <button class="ph-btn">猫</button>
+    </div>
+    <div class="scene" data-scene="buy">
+      <div class="vignette"></div>
+    </div>
+    <div class="sheet buy">
+      <button class="sh-x">✕</button>
+      <div class="sh-head"><span class="sh-name">扩建第 5 块地</span></div>
+      <div class="sh-desc">买下后开放「猫诊所」建筑，同时解锁医疗链的产出。</div>
+      <div class="cost-row"><span>地价 <b>⭐ 20</b></span><span style="color:#97836D">现有 ⭐1,240</span></div>
+      <div class="sh-btns">
+        <button class="sh-btn ok">确认扩建</button>
+        <button class="sh-btn no">再想想</button>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+</div>
+
+<div class="spec">
+  <h4>交互规格（实现时按此落地）</h4>
+  <ol>
+    <li><b>平移</b>：单指拖拽空白处移动镜头，松手无惯性；边界限制沿用现有 <code>clampCam</code>。拖拽位移 &gt; 4px 时不触发点击（现有 <code>moved</code> 判定直接复用）。</li>
+    <li><b>点已建建筑</b>：底部滑出信息卡（120ms 上滑 + 淡入）；点空白处 / × / 再点同一建筑 → 收起。</li>
+    <li><b>点告示牌</b>：弹出购地确认卡；星星不足时「确认扩建」置灰并显示「还差 ⭐N」。</li>
+    <li><b>长按建筑 400ms</b>：进入装饰摆放模式（拖拽移动、点旋转、点空白退出）。装饰只花星星，不产出。</li>
+    <li><b>进入棋盘</b>：底部深色主按钮是唯一入口，与现有 <code>store.enterBoard()</code> 一致。</li>
+    <li><b>层级</b>：场景 &lt; 信息卡 &lt; 弹窗；信息卡出现时 HUD 与底部栏保持可见（不遮主入口）。</li>
+    <li><b>性能</b>：场景用 Canvas 绘制（沿用现有 YardView 结构），建筑贴图走 <code>src/assets/sprites/regions/</code> 资源键；信息卡用 DOM。禁止在 Canvas 里画文字排版（现有 emoji + 文字标签方案在 C 风格下不成立，改为「贴图 + DOM 标签」）。</li>
+  </ol>
+</div>
+
+<footer class="doc-ft">
+  <p><b>与现状的差异：</b>现在 <code>YardView.vue</code> 用 Canvas 画斜视草地 + emoji 建筑 + 黄牌价格，顶部只有「存档 / ⭐ / 猫狗」，底部「进入棋盘 / 图鉴 / 活动」。本样张把建筑换成 C 水彩建筑贴图，把「点建筑直接升级/进棋盘」改成<b>先出信息卡再选择</b>——避免误触直接进棋盘，也让「升级 / 进入 / 装饰」三个动作各有明确入口。</p>
+  <p><b>素材需求：</b>9 个区域建筑各 2-3 级造型（区域贴图目录已有 <code>region-*.svg</code> 占位），加 4 个通用件（告示牌 / 树 / 路灯 / 长椅）。全部按 C 的炭铅描边 + 淡彩画法绘制。</p>
+  <p><b>下一步：</b>你确认这版交互后，我改 <code>YardView.vue</code>（建筑贴图 + 信息卡 + 购地确认），并补 9 个区域的建筑贴图。</p>
+</footer>
+</div>
+
+<script>
+/* 用同一份布局渲染三个场景，只换高亮态 */
+const LAYOUT = [
+  { t: 'castle', x: 150, y: 92, w: 118 },
+  { t: 'salon', x: 292, y: 118, w: 104 },
+  { t: 'diner', x: 96, y: 208, w: 100 },
+  { t: 'clinic', x: 300, y: 214, w: 96 },
+  { t: 'sign', x: 214, y: 66, w: 74, cost: 20 },
+  { t: 'sign', x: 120, y: 302, w: 70, cost: 28 },
+  { t: 'tree', x: 46, y: 140, w: 76 },
+  { t: 'tree', x: 386, y: 196, w: 70 },
+  { t: 'tree', x: 236, y: 292, w: 62 },
+  { t: 'lamp', x: 250, y: 196, w: 58 },
+  { t: 'bench', x: 176, y: 246, w: 66 },
+];
+
+function buildScene(el) {
+  const mode = el.dataset.scene;
+  const W = 458, H = 560;
+  let tiles = '';
+  // 草地菱形网格（5×4）
+  const ox = 232, oy = 78, TW = 96, TH = 48;
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 5; c++) {
+      const cx = ox + (c - r) * (TW / 2);
+      const cy = oy + (c + r) * (TH / 2);
+      const light = (c + r) % 2 === 0;
+      tiles += `<polygon points="${cx},${cy - TH / 2} ${cx + TW / 2},${cy} ${cx},${cy + TH / 2} ${cx - TW / 2},${cy}" fill="${light ? '#C2D1B0' : '#B9C9A8'}" stroke="#A8BB95" stroke-width=".8" opacity=".95"/>`;
+    }
+  }
+  // 道路（斜向穿过）
+  const road = `<polygon points="10,250 232,362 452,252 452,286 232,396 10,284" fill="#E8DCC4" stroke="#D3C3A5" stroke-width="1.2"/><path d="M40 262 232 358M232 358 420 264" stroke="#FFFDF7" stroke-width="3" stroke-dasharray="10 12" opacity=".9"/>`;
+  // 建筑与装饰
+  let items = '';
+  LAYOUT.forEach((it, i) => {
+    const isSign = it.t === 'sign';
+    const isSel = mode === 'selected' && it.t === 'castle';
+    const isBuy = mode === 'buy' && isSign && it.cost === 20;
+    let ring = '';
+    if (isSel) {
+      ring = `<ellipse class="sel-ring" cx="${it.x + it.w / 2}" cy="${it.y + it.w * 0.86}" rx="${it.w * 0.52}" ry="${it.w * 0.22}" fill="none" stroke="#9E6242" stroke-width="3" stroke-dasharray="7 6"/>`;
+    }
+    if (isBuy) {
+      ring = `<ellipse class="plot-ring" cx="${it.x + it.w / 2}" cy="${it.y + it.w * 0.86}" rx="${it.w * 0.6}" ry="${it.w * 0.26}" fill="#E5C07B" opacity=".5"/>`;
+    }
+    items += ring + `<use href="#b-${it.t}" x="${it.x}" y="${it.y}" width="${it.w}" height="${it.w}"/>`;
+    if (isSign) {
+      items += `<g><rect x="${it.x + it.w / 2 - 26}" y="${it.y + it.w * 0.52}" width="52" height="19" rx="9.5" fill="#FFFDF7" stroke="#E8D9B8" stroke-width="1"/><text x="${it.x + it.w / 2}" y="${it.y + it.w * 0.52 + 13.5}" text-anchor="middle" font-size="11" font-weight="700" fill="#7E6220" font-family="PingFang SC,sans-serif">⭐${it.cost}</text></g>`;
+    }
+  });
+  el.insertAdjacentHTML(
+    'afterbegin',
+    `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">${tiles}${road}${items}</svg>`
+  );
+}
+document.querySelectorAll('.scene').forEach(buildScene);
+</script>
+</body>
+</html>
